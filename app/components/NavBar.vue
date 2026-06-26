@@ -1,6 +1,6 @@
 <template>
   <ul
-    class="absolute top-4 left-[50%] translate-x-[-50%] border-rounded-full bg-gray-300/10 w-max px-4 max-w-64 flex gap-3 items-center justify-center py-1 border-gray-100/10 border-1"
+    class="fixed top-4 left-[50%] translate-x-[-50%] border-rounded-full bg-gray-300/10 w-max px-4 max-w-64 flex gap-3 items-center justify-center py-1 border-gray-100/10 border-1 backdrop-blur-2xl"
     v-auto-animate
   >
     <li>

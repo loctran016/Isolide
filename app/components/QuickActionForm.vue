@@ -1,6 +1,6 @@
 <template>
   <h2
-    class="border-rounded-full px-3 py-2 w-max flex items-center gap-2 font-semibold cursor-pointer font-sans text-lg"
+    class="border-rounded-full px-3 py-2 w-max flex items-center gap-2 font-semibold font-sans text-lg"
   >
     Quick actions
   </h2>

@@ -10,6 +10,7 @@ const supabase = createClient(
 );
 
 const strengthExcercises = ref([]);
+const todayStrengthExcercises = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref(null);
 
@@ -19,7 +20,10 @@ async function fetchEntries() {
     const { data, error } = await supabase.from("strength").select("*");
 
     if (error) throw error;
-    strengthExcercises.value = data;
+    strengthExcercises.value = data ?? [];
+    todayStrengthExcercises.value = strengthExcercises.value.filter((item) => {
+      return dayjs(item.created_at).isSame(dayjs(), "day");
+    });
   } catch (error) {
     errorMessage.value = error.message;
     console.error("Error fetching data:", error);
@@ -61,7 +65,7 @@ onMounted(() => {
       </h2>
       <ul class="grid-cols-3 mt-4">
         <li
-          v-for="items in strengthExcercises"
+          v-for="items in todayStrengthExcercises"
           :key="items.id"
           class="bg-stone-700/30 hover:bg-stone-500/30 duration-200 w-1/3 border-rounded-md cursor-pointer p-4"
         >
@@ -80,6 +84,12 @@ onMounted(() => {
               {{ reps }} reps - {{ weight }}kg
             </li>
           </ul> -->
+        </li>
+        <li
+          v-if="todayStrengthExcercises.length < 3"
+          class="border-stone-700/30 border-1 hover:border-gray-400/30 border-dashed flex items-center justify-center duration-200 w-1/3 border-rounded-md cursor-pointer p-4"
+        >
+          <div class="i-mdi:plus" />
         </li>
       </ul>
     </div>
