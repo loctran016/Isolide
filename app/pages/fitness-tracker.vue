@@ -49,18 +49,11 @@ onMounted(() => {
 
 <template>
   <div
-    class="grid grid-cols-6 gap-4 max-w-4/5 mt-16 px-4 py-4 mx-auto font-sans"
+    class="grid lg:grid-cols-6 gap-4 max-w-9/10 lg:max-w-4/5 mt-16 px-4 py-4 mx-auto font-sans"
   >
-    <div class="col-span-2 w-full p-4">
-          <h2
-    class="border-rounded-full px-3 py-2 w-max flex items-center gap-2 font-semibold font-sans text-lg"
-  >
-    Quick actions
-  </h2>
-      <StrengthForm />
-    </div>
+    
     <div
-      class="col-span-4 w-full border-gray-100/10 border-1 p-4 border-rounded-lg"
+      class="lg:col-span-4 w-full border-gray-100/10 border-1 p-4 border-rounded-lg"
     >
       <h2
         class="border-rounded-full w-max px-3 py-2 hover:bg-gray-400/30 transition-all duration-300 flex items-center gap-2 font-bold cursor-pointer font-sans text-base"
@@ -97,6 +90,14 @@ onMounted(() => {
           <div class="i-mdi:plus" />
         </li>
       </ul>
+    </div>
+<div class="lg:col-span-2 lg:order-first w-full p-4">
+          <h2
+    class="border-rounded-full px-3 py-2 w-max flex items-center gap-2 font-semibold font-sans text-lg"
+  >
+    Quick actions
+  </h2>
+      <StrengthForm />
     </div>
   </div>
 </template>
