@@ -385,7 +385,7 @@ export const MUSCLE_TO_EXERCISES: Record<MuscleGroup, StrengthExercise[]> = {
   ],
 };
 
-export interface ExerciseRecord {
+export interface StrengthRecord {
   id: number;
   date: string; // timestamp
   exercise: StrengthExercise;
@@ -398,10 +398,10 @@ export interface ExerciseRecord {
 export interface Database {
   public: {
     Tables: {
-      exercises: {
-        Row: ExerciseRecord;
-        Insert: Omit<ExerciseRecord, 'id' | 'created_at'>;
-        Update: Partial<Omit<ExerciseRecord, 'id' | 'created_at'>>;
+      strength: {
+        Row: StrengthRecord;
+        Insert: Omit<StrengthRecord, 'id' | 'created_at'>;
+        Update: Partial<Omit<StrengthRecord, 'id' | 'created_at'>>;
       };
     };
   };
