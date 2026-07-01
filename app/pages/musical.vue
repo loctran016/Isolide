@@ -41,7 +41,12 @@
     </ComboboxRoot>
 
     <div class="w-3/4 mx-auto mt-10">
-      <ABCRenderer v-if="tuneAbc" :abcNotation="tuneAbc" />
+      <ClientOnly>
+        <ABCRenderer v-if="tuneAbc" :abcNotation="tuneAbc" />
+        <template #fallback>
+          <div class="text-sm text-stone-400">Loading notation...</div>
+        </template>
+      </ClientOnly>
     </div>
   </main>
   <div class="fixed bottom-4 right-4">
