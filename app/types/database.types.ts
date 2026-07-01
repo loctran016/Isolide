@@ -396,7 +396,7 @@ export interface StrengthRecord {
   date: string // timestamp
   exercise: StrengthExercise
   created_at: string // timestamp
-  sets: number[]
+  sets: number[][] // <- changed to 2D
   muscles: MuscleGroup[]
 }
 
