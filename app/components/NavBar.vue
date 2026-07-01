@@ -29,7 +29,7 @@
         ><IconNavBarWrapper><div class="i-solar:gallery-round-bold" /></IconNavBarWrapper
       ></NuxtLink>
     </li>
-    <ClientOnly>
+    <ClientOnlyReady>
       <li>
         <ColorScheme placeholder="..." tag="span">
           <button
@@ -57,9 +57,14 @@
       </li>
       <template #fallback>
         <li>
-          <div class="p-3 opacity-50">...</div>
+          <button
+            class="cursor-pointer duration-200 border-rounded-full text-lg lg:text-xl p-3 flex items-center justify-center"
+            disabled
+          >
+            <div class="i-tabler:device-laptop" />
+          </button>
         </li>
       </template>
-    </ClientOnly>
+    </ClientOnlyReady>
   </ul>
 </template>
