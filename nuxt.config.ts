@@ -1,19 +1,19 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: "2025-07-15",
+  compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   modules: [
-    "@unocss/nuxt",
-    "@formkit/auto-animate",
-    "@vueuse/nuxt",
-    "motion-v/nuxt",
-    "@vee-validate/nuxt",
-    "@nuxt/image",
-    "@nuxtjs/supabase",
-    "@nuxtjs/color-mode",
-    "nuxt-echarts",
+    '@unocss/nuxt',
+    '@formkit/auto-animate',
+    '@vueuse/nuxt',
+    'motion-v/nuxt',
+    '@vee-validate/nuxt',
+    '@nuxt/image',
+    '@nuxtjs/supabase',
+    '@nuxtjs/color-mode',
+    'nuxt-echarts',
     '@nuxt/eslint',
-    "@vite-pwa/nuxt"
+    '@vite-pwa/nuxt',
   ],
   runtimeConfig: {
     public: {
@@ -22,15 +22,20 @@ export default defineNuxtConfig({
     },
   },
   app: {
-    pageTransition: { name: "page", mode: "out-in" },
+    pageTransition: { name: 'page', mode: 'out-in' },
   },
   supabase: {
-      useSsrCookies: true, // This should be true for SSR support
-      redirect: false,
-    },
-    image: {
+    useSsrCookies: true, // This should be true for SSR support
+    redirect: false,
+  },
+  image: {
     cloudinary: {
-      baseURL: 'https://res.cloudinary.com/loctran016/image/upload'
-    }
-  }
-});
+      baseURL: 'https://res.cloudinary.com/loctran016/image/upload',
+    },
+  },
+  colorMode: {
+    preference: 'system', // or 'light' to test deterministic mode
+    fallback: 'light',
+    classSuffix: '',
+  },
+})

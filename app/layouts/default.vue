@@ -9,6 +9,7 @@ const { $pwa } = useNuxtApp()
 </script>
 
 <template>
+  <!-- <div class="w-full bg-stone-50/20 text-stone-900 scrollbar-track-op-0 scrollbar-thin"> -->
   <div
     class="w-full bg-stone-50/20 text-stone-900 dark:bg-stone-900 dark:text-gray-100 scrollbar-track-op-0 scrollbar-thin"
   >

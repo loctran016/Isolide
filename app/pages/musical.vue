@@ -107,8 +107,4 @@ watch(
   },
   { immediate: true },
 )
-
-definePageMeta({
-  colorMode: 'light',
-})
 </script>
