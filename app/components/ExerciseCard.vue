@@ -15,7 +15,7 @@
       />
       {{ df.format(parseDateTime(exercise.date).toDate('Asia/Ho_Chi_Minh')) }}
     </div>
-<div class="flex justify-between items-start mt-4 border-t-1 border-gray-800/20 border-dashed dark:border-gray-600/20">
+<div class="flex justify-between items-start mt-2 pt-2 border-t-1 border-gray-800/40 border-dashed dark:border-gray-600/40">
     <div
       class="text-sm font-bold"
       :class="
