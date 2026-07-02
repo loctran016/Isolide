@@ -349,14 +349,14 @@ onBeforeUnmount(() => {
           class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
           @select.prevent="decreaseBpm(1)"
         >
-          <span>BPM -1</span><span class="text-neutral-500">{{ bpm }}</span>
+          <span>BPM -1</span><span class="text-neutral-500 select-none">{{ bpm }}</span>
         </ContextMenuItem>
 
         <ContextMenuItem
           class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
           @select.prevent="increaseBpm(1)"
         >
-          <span>BPM +1</span><span class="text-neutral-500">{{ bpm }}</span>
+          <span>BPM +1</span><span class="text-neutral-500 select-none">{{ bpm }}</span>
         </ContextMenuItem>
 
         <ContextMenuItem
