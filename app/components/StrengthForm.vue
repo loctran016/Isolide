@@ -103,7 +103,7 @@
                 </div>
 
                 <p v-if="errorMsg" class="text-sm text-red-600 dark:text-red-400 bg-red-950/60">
-                  <div class="i-tabler:alert-circle inline mr-1"></div>{{ errorMsg }}
+                  {{ errorMsg }}
                 </p>
                 <p v-if="successMsg" class="text-sm text-emerald-600 dark:text-emerald-400">
                   {{ successMsg }}
