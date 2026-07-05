@@ -136,7 +136,7 @@ function eventsForDate(d: { year: number; month: number; day: number }) {
                     </CalendarHeadCell>
                   </CalendarGridRow>
                 </CalendarGridHead>
-                <CalendarGridBody class="grid">
+                <CalendarGridBody class="grid gap-1">
                   <CalendarGridRow
                     v-for="(weekDates, index) in month.rows"
                     :key="`weekDate-${index}`"
@@ -154,10 +154,10 @@ function eventsForDate(d: { year: number; month: number; day: number }) {
                             :day="weekDate"
                             :month="month.value"
                             :class="[
-                              'relative flex items-center justify-center rounded-full whitespace-nowrap text-sm font-normal w-10 h-10 outline-none focus:shadow-[0_0_0_2px] focus:shadow-black data-[outside-view]:text-stone-900/30 dark:data-[outside-view]:text-stone-50/30 data-[selected]:bg-purple-400/40 data-[selected]:text-purple-700 dark:data-[selected]:bg-purple-500/30 dark:data-[selected]:text-purple-300 data-[selected]:font-bold hover:bg-purple-700/20 dark:hover:bg-purple-400/20 data-[highlighted]:bg-purple-700/20 data-[unavailable]:pointer-events-none data-[unavailable]:text-stone-800/30 data-[unavailable]:line-through before:absolute before:top-[5px] before:hidden before:rounded-full before:w-1 before:h-1 before:bg-white data-[today]:before:block data-[today]:before:bg-purple-400/50 cursor-pointer',
-                              'after:absolute after:bottom-[5px] after:rounded-full after:w-1 after:h-1 after:bg-emerald-400',
+                              'relative flex items-center justify-center rounded-full whitespace-nowrap text-sm font-normal w-10 h-10 outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-800 data-[outside-view]:text-stone-900/30 dark:data-[outside-view]:text-stone-50/30 data-[selected]:bg-purple-400/40 data-[selected]:text-purple-700 dark:data-[selected]:bg-purple-500/30 dark:data-[selected]:text-purple-300 data-[selected]:font-bold hover:bg-purple-700/20 dark:hover:bg-purple-400/20 data-[highlighted]:bg-purple-700/20 data-[unavailable]:pointer-events-none data-[unavailable]:text-stone-800/30 data-[unavailable]:line-through before:absolute before:top-[5px] before:hidden before:rounded-full before:w-1 before:h-1 before:bg-white data-[today]:before:block data-[today]:before:bg-purple-400/50 cursor-pointer',
+                              'after:absolute after:bottom-[5px] after:rounded-full after:w-1 after:h-1',
                               eventsForDate(weekDate).length
-                                ? 'after:block ring-1 ring-pink-600/70 dark:ring-pink-400/70 font-semibold'
+                                ? 'after:block after:bg-pink-500 ring-1 ring-pink-500/70 font-semibold !text-pink-600 hover:!text-pink-500 dark:!text-pink-400 dark:hover:!text-pink-300 !bg-pink-400/40 hover:!bg-pink-400/60 dark:!bg-pink-500/30 dark:hover:!bg-pink-500/50 data-[selected]:!bg-pink-400/50 dark:data-[selected]:!bg-pink-500/40 data-[outside-view]:!bg-transparent data-[outside-view]:hover:!bg-transparent dark:data-[outside-view]:!bg-transparent dark:data-[outside-view]:hover:!bg-transparent data-[outside-view]:!ring-0 data-[outside-view]:after:!hidden data-[outside-view]:!text-pink-600/30 dark:data-[outside-view]:!text-pink-400/30 data-[outside-view]:!font-normal'
                                 : 'after:hidden',
                             ]"
                           />
