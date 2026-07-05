@@ -1,7 +1,6 @@
 <template>
   <li
-    class="duration-200 w-full border-rounded-md cursor-pointer p-4 group"
-    :class="cardClass"
+    class="duration-200 w-full border-rounded-md cursor-pointer p-4 group bg-stone-300/30 hover:bg-stone-400/35 dark:bg-stone-700/30 dark:hover:bg-stone-500/30"
   >
     <h3 class="font-bold flex items-center gap-2 font-sans text-base">
       <div class="i-mdi:dumbbell" />
@@ -15,16 +14,20 @@
       />
       {{ df.format(parseDateTime(exercise.date).toDate('Asia/Ho_Chi_Minh')) }}
     </div>
-<div class="flex justify-between items-start mt-2 pt-2 border-t-1 border-gray-800/40 border-dashed dark:border-gray-600/40">
     <div
-      class="text-sm font-bold"
-      :class="
-        EXERCISE_TO_SPLIT[exercise.exercise] === 'Pull' ? 'text-purple-600 dark:text-purple-300' : 'text-pink-600 dark:text-pink-300'
-      "
+      class="flex justify-between items-start mt-2 pt-2 border-t-1 border-gray-800/40 border-dashed dark:border-gray-600/40"
     >
-      {{ EXERCISE_TO_SPLIT[exercise.exercise].toUpperCase() }}
-    </div>
-    <!-- <div v-if="showDate" class="text-sm mt-2 flex gap-1">
+      <div
+        class="text-sm font-bold"
+        :class="
+          EXERCISE_TO_SPLIT[exercise.exercise] === 'Pull'
+            ? 'text-purple-600 dark:text-purple-300'
+            : 'text-pink-600 dark:text-pink-300'
+        "
+      >
+        {{ EXERCISE_TO_SPLIT[exercise.exercise].toUpperCase() }}
+      </div>
+      <!-- <div v-if="showDate" class="text-sm mt-2 flex gap-1">
       <div
         v-if="showDayColor"
         class="text-base rounded-sm my-auto w-3 aspect-square inline-block self-center"
@@ -37,16 +40,16 @@
       {{ df.format(parseDateTime(exercise.date).toDate('Asia/Ho_Chi_Minh')) }}
     </div> -->
 
-    <ul class="flex flex-wrap items-left gap-1 text-xs justify-end max-w-6/10 lg:max-w-7/10">
-      <li
-        v-for="muscle in exercise.muscles"
-        :key="`${exercise.id}-${muscle}`"
-        class="w-max rounded-lg px-2 py-1 transition-all duration-200"
-        :class="muscleClass"
-      >
-        {{ muscle }}
-      </li>
-    </ul></div>
+      <ul class="flex flex-wrap items-left gap-1 text-xs justify-end max-w-6/10 lg:max-w-7/10">
+        <li
+          v-for="muscle in exercise.muscles"
+          :key="`${exercise.id}-${muscle}`"
+          class="w-max rounded-lg px-2 py-1 transition-all duration-200 bg-purple-600/20 hover:bg-purple-600/30 dark:bg-purple-400/10 dark:hover:bg-purple-400/50"
+        >
+          {{ muscle }}
+        </li>
+      </ul>
+    </div>
   </li>
 </template>
 
@@ -83,14 +86,14 @@ const dayToColor = [
 
 const showDate = true
 const showDayColor = props.variant === 'all'
-const cardClass =
-  props.variant === 'all'
-    ? 'bg-stone-300/30 hover:bg-stone-500/30 dark:bg-stone-700/30 dark:hover:bg-stone-500/30'
-    : 'bg-stone-300/30 hover:bg-stone-500/30 dark:bg-stone-700/30 dark:hover:bg-stone-500/30'
-const muscleClass =
-  props.variant === 'all'
-    ? 'bg-purple-600/20 hover:bg-purple-400/50 dark:bg-purple-400/10 dark:hover:bg-purple-400/50'
-    : 'bg-purple-400/10 hover:bg-purple-400/50'
+// const cardClass =
+//   props.variant === 'all'
+//     ? 'bg-stone-300/30 hover:bg-stone-500/30 dark:bg-stone-700/30 dark:hover:bg-stone-500/30'
+//     : 'bg-stone-300/30 hover:bg-stone-500/30 dark:bg-stone-700/30 dark:hover:bg-stone-500/30'
+// const muscleClass =
+//   props.variant === 'all'
+//     ? 'bg-purple-600/20 hover:bg-purple-400/50 dark:bg-purple-400/10 dark:hover:bg-purple-400/50'
+//     : 'bg-purple-600/20 hover:bg-purple-400/50 dark:bg-purple-400/10 dark:hover:bg-purple-400/50'
 </script>
 
 <style></style>

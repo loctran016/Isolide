@@ -61,6 +61,8 @@ const iconClass = computed(() => {
 })
 
 const buttonClass = computed(() => {
+  if (themePref.value === 'system')
+    return 'hover:text-pink-700 hover:bg-pink-400/40 dark:hover:text-pink-400 dark:hover:bg-pink-600/30'
   if (themePref.value === 'dark') {
     return 'hover:bg-stone-100/10 hover:text-white'
   }

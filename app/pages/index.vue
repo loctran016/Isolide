@@ -44,7 +44,7 @@ const selectedDate = ref()
 <template>
   <div class="min-h-screen">
     <div
-      class="grid lg:grid-cols-6 gap-4 max-w-9/10 lg:max-w-4/5 px-4 pt-20 py-4 mx-auto font-sans dark:text-gray-100"
+      class="grid lg:grid-cols-6 gap-4 h-screen items-center max-w-9/10 lg:max-w-4/5 px-4 py-4 mx-auto font-sans dark:text-gray-100"
     >
       <ClientOnly>
         <CalendarRoot
@@ -63,7 +63,7 @@ const selectedDate = ref()
             >
               <div class="i-mdi:arrow-left" />
             </CalendarPrev>
-            <CalendarHeading class="font-medium" />
+            <CalendarHeading class="font-medium text-xl font-head" />
 
             <CalendarNext
               class="inline-flex items-center cursor-pointer justify-center rounded-md bg-transparent p-2 text-2xl hover:translate-x-1 transition-all duration-200 hover:text-purple-600 active:scale-98 active:transition-all focus:shadow-[0_0_0_2px] focus:shadow-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
@@ -71,7 +71,7 @@ const selectedDate = ref()
               <div class="i-mdi:arrow-right" />
             </CalendarNext>
           </CalendarHeader>
-          <div class="flex flex-col text-head space-y-4 pt-4 sm:flex-row sm:space-x-4 sm:space-y-0">
+          <div class="flex flex-col space-y-4 pt-4 sm:flex-row sm:space-x-4 sm:space-y-0">
             <CalendarGrid
               v-for="month in grid"
               :key="month.value.toString()"
