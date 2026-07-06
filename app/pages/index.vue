@@ -46,7 +46,7 @@ useHead({
   ],
 })
 
-definePageMeta({ title: 'Home Islet' })
+definePageMeta({ title: 'Home Island' })
 
 const selectedDate = ref()
 

@@ -2,6 +2,15 @@
 const { $pwa } = useNuxtApp()
 const route = useRoute()
 const pageTitle = computed(() => (route.meta.title as string) ?? '')
+
+useHead({
+  bodyAttrs: {
+    class: 'scrollbar-thin-all',
+  },
+  htmlAttrs: {
+    class: 'scrollbar-thin-all',
+  },
+})
 </script>
 
 <template>

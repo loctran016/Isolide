@@ -30,8 +30,8 @@ export default defineNuxtConfig({
   },
   pwa: {
     manifest: {
-      name: 'IndexForty',
-      theme_color: '#ffffff',
+      name: 'Isolde',
+      theme_color: '#4F46E5',
       // icons are auto-injected — no need to list them manually
     },
     pwaAssets: {
