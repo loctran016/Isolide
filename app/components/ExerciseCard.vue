@@ -1,6 +1,6 @@
 <template>
   <li
-    class="duration-200 w-full border-rounded-md cursor-pointer p-4 group bg-purple-50/25 hover:bg-purple-50/35 border border-white/10 dark:bg-purple-950/25 dark:hover:bg-purple-950/35 dark:border-white/5 min-h-24"
+    class="duration-200 w-full border-rounded-md cursor-pointer p-4 group bg-purple-50/25 hover:bg-purple-50/35 border border-white/10 dark:bg-purple-950/25 dark:hover:bg-purple-950/35 dark:border-white/5 min-h-36"
   >
     <h3 class="font-bold flex items-center gap-2 font-sans text-base">
       <div class="i-mdi:dumbbell" />
