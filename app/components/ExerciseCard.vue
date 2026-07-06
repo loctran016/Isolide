@@ -75,7 +75,7 @@ const df = new DateFormatter('en-GB', {
 })
 
 const dayToColor = [
-  'bg-red-400/50',
+  'bg-yellow-400/50',
   'bg-amber-400/50',
   'bg-emerald-400/50',
   'bg-sky-400/50',
