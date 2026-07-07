@@ -23,7 +23,9 @@
               :animate="{ opacity: 1, top: '50%' }"
               :exit="{ opacity: 0, top: '30%' }"
             >
-              <DialogTitle class="font-semibold font-head text-lg mb-5 leading-normal dark:text-gray-100">
+              <DialogTitle
+                class="font-semibold font-head text-lg mb-5 leading-normal dark:text-gray-100"
+              >
                 Strength Exercise
               </DialogTitle>
 
@@ -151,6 +153,8 @@ import { useRegle } from '@regle/core'
 import { required, requiredIf, numeric, minValue, minLength, withMessage } from '@regle/rules'
 import { EXERCISE_TO_MUSCLES, type StrengthExercise, type Database } from '~/types/database.types'
 
+// add alongside the other refs
+const props = defineProps<{ presetExercise?: StrengthExercise }>()
 const supabase = useSupabaseClient()
 
 const open = ref(false)
@@ -217,10 +221,12 @@ function resetForm() {
   r$.$reset({ toInitialState: true })
 }
 
+// update the existing open watcher
 watch(open, (v) => {
   if (v) {
     errorMsg.value = ''
     successMsg.value = ''
+    if (props.presetExercise) exercise.value = props.presetExercise
   }
 })
 

@@ -203,6 +203,7 @@ const splitOption = computed(() => ({
 
 <template>
   <div class="grid lg:grid-cols-6 gap-4 px-4 py-4 mx-auto font-sans dark:text-gray-100">
+    <!-- <WeeklySplit class="lg:col-span-6 card" /> -->
     <div class="lg:col-span-4 card">
       <h2 class="card-title">
         <div class="i-healthicons:exercise-weights text-lg" />
@@ -224,7 +225,7 @@ const splitOption = computed(() => ({
         ></StrengthForm>
       </ul>
     </div>
-    <div class="lg:col-span-2 lg:order-first card">
+    <div class="lg:col-span-2 card">
       <h2 class="px-3 py-2 w-max flex items-center gap-2 font-semibold font-head text-lg">
         Quick actions
       </h2>

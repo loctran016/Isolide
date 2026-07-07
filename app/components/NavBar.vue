@@ -68,7 +68,7 @@ const buttonClass = computed(() => {
 
 const navItems = [
   { to: '/', icon: 'i-mdi:home', label: 'Home' },
-  { to: '/fitness-tracker', icon: 'i-mdi:weight-lifter', label: 'Fitness' },
+  { to: '/fitness', icon: 'i-mdi:weight-lifter', label: 'Fitness' },
   { to: '/musical', icon: 'i-mdi:music-clef-treble', label: 'Musical' },
   { to: '/gallery', icon: 'i-solar:gallery-round-bold', label: 'Gallery' },
 ]
