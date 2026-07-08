@@ -14,7 +14,6 @@ watch(themePref, applyTheme)
 let cleanup: (() => void) | null = null
 
 onMounted(() => {
-  applyTheme()
   const mq = window.matchMedia('(prefers-color-scheme: dark)')
   const handler = () => {
     if (themePref.value === 'system') applyTheme()

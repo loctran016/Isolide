@@ -33,6 +33,16 @@ export default defineNuxtConfig({
   },
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
+    head: {
+      script: [
+        {
+          innerHTML: `(function(){var c=document.cookie.match(/theme-preference=([^;]+)/);var p=c?c[1]:'system';var d=p==='dark'||(p==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches);document.documentElement.classList.toggle('dark',d)})()`,
+          type: 'text/javascript',
+          tagPosition: 'head',
+          tagPriority: 'critical',
+        },
+      ],
+    },
   },
   components: [
     {

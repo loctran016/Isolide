@@ -85,11 +85,11 @@ const DAILY_GOAL = 15
 // derive year from the pinned todayDate instead of calling today() again
 const todayYear = computed(() => parseDate(todayDate.value).year)
 
-const selectedYear = (ref < number) | (null > null)
+// ✅ Correct
+const selectedYear = ref(null)
 onMounted(() => {
   selectedYear.value = todayYear.value
 })
-
 const availableYears = computed(() => {
   const years = new Set([todayYear.value]) // use pinned value
   for (const item of strengthExercises.value ?? []) {
