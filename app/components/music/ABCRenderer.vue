@@ -5,14 +5,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
-
 const props = defineProps<{ abcNotation: string }>()
 
 const sheetMusic = ref<HTMLElement | null>(null)
 let abcjs: typeof import('abcjs') | null = null
 let abcjsLoadPromise: Promise<typeof import('abcjs')> | null = null
-
+/*
+These are declared outside the component, so they're shared across all instances of ABCRenderer on the page. That's actually intentional and fine here — abcjs only needs to load once. But worth being explicit about it with a comment so future-you doesn't wonder if it's a bug.
+*/
 let isMounted = false
 let renderId = 0 // guards against stale/out-of-order async renders
 

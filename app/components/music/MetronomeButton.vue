@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import {
   ContextMenuRoot,
   ContextMenuTrigger,
@@ -196,7 +195,7 @@ async function toggle() {
 }
 
 function restartIfPlaying() {
-  if (isPlaying.value) start()
+  if (isPlaying.value) start().catch(() => {})
 }
 
 function increaseBpm(step = 1) {
@@ -273,6 +272,7 @@ onMounted(() => {
 
 // save (debounce not necessary here, tiny payload)
 watch([bpm, beatsPerBar, accentFirstBeat, soundMode], () => {
+  if (!import.meta.client) return
   try {
     localStorage.setItem(
       STORAGE_KEY,
@@ -285,6 +285,19 @@ watch([bpm, beatsPerBar, accentFirstBeat, soundMode], () => {
     )
   } catch {}
 })
+// watch([bpm, beatsPerBar, accentFirstBeat, soundMode], () => {
+//   try {
+//     localStorage.setItem(
+//       STORAGE_KEY,
+//       JSON.stringify({
+//         bpm: bpm.value,
+//         beatsPerBar: beatsPerBar.value,
+//         accentFirstBeat: accentFirstBeat.value,
+//         soundMode: soundMode.value,
+//       }),
+//     )
+//   } catch {}
+// })
 
 // BPM / meter changes should be reflected immediately while playing
 watch(bpm, restartIfPlaying)
@@ -307,10 +320,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <ContextMenuRoot class="select-none">
+  <ContextMenuRoot>
     <ContextMenuTrigger as-child>
       <button
-        class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium bg-neutral-900 text-white hover:bg-neutral-800 active:scale-[0.98] transition select-none"
+        class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium card text-white active:scale-[0.98] transition select-none"
         @click="toggle"
       >
         <span class="inline-flex gap-1">
@@ -329,7 +342,7 @@ onBeforeUnmount(() => {
 
     <ContextMenuPortal>
       <ContextMenuContent
-        class="min-w-68 max-h-[70vh] overflow-y-auto rounded-xl border border-neutral-200 bg-white p-1 pt-2 shadow-xl outline-none dark:border-neutral-700 dark:bg-neutral-900"
+        class="min-w-68 max-h-[70vh] overflow-y-auto rounded-xl border border-neutral-200 bg-white p-1 pt-2 shadow-xl outline-none dark:border-neutral-700 select-none dark:bg-neutral-900"
       >
         <ContextMenuLabel class="px-2 py-1 text-xs text-neutral-500">
           Metronome (Space to toggle)

@@ -75,7 +75,10 @@ type Tune = {
 // app/pages/musical.vue
 definePageMeta({ title: 'Sound Island' })
 
-const tuneModules = import.meta.glob('~/assets/data/tunes/*.abc', { query: '?raw' })
+const tuneModules = import.meta.glob('~/assets/data/tunes/*.abc', {
+  query: '?raw',
+  import: 'default',
+})
 
 const tuneList: Tune[] = Object.keys(tuneModules).map((path) => {
   const filename = path.split('/').pop() ?? ''
@@ -118,7 +121,7 @@ onBeforeUnmount(() => {
 watch(
   selectedTune,
   (tune) => {
-    if (tune) loadTune(tune.path)
+    if (tune && import.meta.client) loadTune(tune.path) // client-only
   },
   { immediate: true },
 )
