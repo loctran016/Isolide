@@ -83,15 +83,21 @@ const DAILY_GOAL = 15
 
 // --- Year selector for the heatmap ---
 
+// derive year from the pinned todayDate instead of calling today() again
+const todayYear = computed(() => parseDate(todayDate.value).year)
+
+const selectedYear = (ref < number) | (null > null)
+onMounted(() => {
+  selectedYear.value = todayYear.value
+})
+
 const availableYears = computed(() => {
-  const years = new Set([today(TIME_ZONE).year])
+  const years = new Set([todayYear.value]) // use pinned value
   for (const item of strengthExercises.value ?? []) {
     if (item?.date) years.add(parseDateTime(item.date).year)
   }
   return [...years].sort((a, b) => b - a)
 })
-
-const selectedYear = ref(today(TIME_ZONE).year)
 
 const yearHeatmapData = computed(() => {
   const data = []
@@ -150,7 +156,7 @@ const heatmapOption = computed(() => {
 
 const currentStreak = computed(() => {
   let streak = 0
-  let cursor = today(TIME_ZONE)
+  let cursor = todayCalendarDate.value
   if (setsLoggedOn(cursor) === 0) cursor = cursor.subtract({ days: 1 })
   while (setsLoggedOn(cursor) > 0) {
     streak++
@@ -162,7 +168,7 @@ const currentStreak = computed(() => {
 const RECENT_WINDOW_DAYS = 30
 
 const splitTotals = computed(() => {
-  const cutoff = today(TIME_ZONE).subtract({ days: RECENT_WINDOW_DAYS })
+  const cutoff = todayCalendarDate.value.subtract({ days: RECENT_WINDOW_DAYS })
   let push = 0
   let pull = 0
   for (const item of strengthExercises.value ?? []) {
