@@ -264,7 +264,7 @@ const splitOption = computed(() => ({
 
     <!-- Streak + split, side by side below -->
 
-    <div class="lg:col-span-2 h-74 card">
+    <div class="lg:col-span-2 h-76 card">
       <h2 class="card-title !text-base mb-2">Weight & BF</h2>
     </div>
 
