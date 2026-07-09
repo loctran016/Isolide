@@ -1,7 +1,6 @@
 <script setup>
 import { parseDateTime, today, parseDate } from '@internationalized/date'
-import { EXERCISE_TO_SPLIT } from '~/types/database.types'
-
+import { EXERCISE_TO_SPLIT, STRENGTH_EXERCISES } from '~/types/database.types'
 useHead({
   title: 'Body Island',
   meta: [{ name: 'description', content: 'Activity and metric logs.' }],
@@ -20,8 +19,19 @@ function syncEchartsTextColor() {
 }
 
 const { themePref } = useTheme()
-
 const colorMode = computed(() => themePref.value)
+
+// Shared by every ECharts option on this page. Safe here because it's
+// only ever read inside <ClientOnly>-rendered chart options, or passed
+// as a prop into a component that's itself only mounted client-side —
+// never used to drive SSR'd DOM directly.
+const isDark = computed(
+  () =>
+    colorMode.value === 'dark' ||
+    (colorMode.value === 'system' &&
+      import.meta.client &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches),
+)
 
 onMounted(syncEchartsTextColor)
 watch(
@@ -164,16 +174,15 @@ function setsLoggedOn(calDate) {
 
 const DAILY_GOAL = 15
 
+// --- Selected Exercise Improvement ---
+
+const selectedExercise = ref('Incline DB Bench Press')
+// const selectedExercise = ref<StrengthExercise | null>('Incline DB Bench Press')
+
 // --- Year selector for the heatmap ---
 
 // derive year from the pinned todayDate instead of calling today() again
 const todayYear = computed(() => parseDate(todayDate.value).year)
-
-// ✅ Correct
-// const selectedYear = ref(null)
-// onMounted(() => {
-//   selectedYear.value = todayYear.value
-// })
 
 const selectedYear = useState('fitness-selected-year', () => todayYear.value)
 
@@ -283,12 +292,6 @@ function formatIsoDateHeatmap(iso) {
 const hasSplitData = computed(() => splitTotals.value.push + splitTotals.value.pull > 0)
 
 const splitOption = computed(() => {
-  const isDark =
-    colorMode.value === 'dark' ||
-    (colorMode.value === 'system' &&
-      import.meta.client &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches)
-
   return {
     tooltip: { trigger: 'item', formatter: '{b}: {c} sets ({d}%)' },
     legend: {
@@ -316,11 +319,22 @@ const splitOption = computed(() => {
 <template>
   <div class="grid lg:grid-cols-6 gap-4 px-4 py-4 mx-auto font-sans dark:text-gray-100">
     <div class="lg:col-span-4 card">
-      <h2 class="card-title">
-        <div class="i-solar:graph-new-up-bold text-lg" />
-        Improvements
-      </h2>
+      <div class="flex items-center justify-between">
+        <h2 class="card-title">
+          <div class="i-solar:graph-new-up-bold text-lg" />
+          Improvements
+        </h2>
+        <Select v-model="selectedExercise" :options="STRENGTH_EXERCISES" />
+      </div>
+      <ExerciseProgressChart
+        class="mt-4"
+        :exercise="selectedExercise"
+        :today-date="todayDate"
+        :is-dark="isDark"
+        :strength-exercises="strengthExercises"
+      />
     </div>
+
     <div class="lg:col-span-2 card">
       <h2 class="card-title flex flex-col items-start gap-1">
         <template v-if="todaySchedule">
@@ -343,6 +357,7 @@ const splitOption = computed(() => {
               <button
                 type="button"
                 class="w-full flex items-center justify-between gap-4 text-sm rounded-lg px-3 py-2.5 -mx-1 hover:bg-purple-400/15 dark:hover:bg-purple-500/15 transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
+                @click="selectedExercise = ex.canonical"
               >
                 <span class="truncate">
                   {{ ex.display }}

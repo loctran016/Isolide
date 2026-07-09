@@ -549,11 +549,13 @@ export const MUSCLE_TO_EXERCISES: Record<MuscleGroup, StrengthExercise[]> = {
 
 export interface StrengthRecord {
   id: number
-  date: string // timestamp
+  date: string
   exercise: StrengthExercise
-  created_at: string // timestamp
-  sets: number[][] // <- changed to 2D
+  created_at: string
+  sets: number[][]
   muscles: MuscleGroup[]
+  one_rep_max: number
+  total_volume: number
 }
 
 export interface Database {

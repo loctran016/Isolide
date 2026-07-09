@@ -69,6 +69,12 @@ function addSet() {
 function removeSet(index: number) {
   form.value.sets.splice(index, 1)
 }
+
+// Epley formula — standard 1RM estimate, most reliable in the 1–10 rep range
+function estimateOneRepMax(reps: number, kg: number) {
+  return kg * (1 + reps / 30)
+}
+
 function resetForm() {
   form.value.exercise = null
   form.value.sets = [
@@ -102,9 +108,21 @@ async function onSubmit() {
       .filter((s) => s.reps != null && s.kg != null)
       .map((s) => [s.reps as number, s.kg as number])
 
+    const totalVolume = parsedSets.reduce((sum, [reps, kg]) => sum + reps * kg, 0)
+    const oneRepMax = parsedSets.length
+      ? Math.round(Math.max(...parsedSets.map(([reps, kg]) => estimateOneRepMax(reps, kg))) * 10) /
+        10
+      : 0
+
     const { error } = await supabase
       .from<Database['public']['Tables']['strength']['Insert']>('strength')
-      .insert({ exercise: exerciseKey, sets: parsedSets, muscles: [...muscles] })
+      .insert({
+        exercise: exerciseKey,
+        sets: parsedSets,
+        muscles: [...muscles],
+        one_rep_max: oneRepMax,
+        total_volume: totalVolume,
+      })
 
     if (error) throw error
 
