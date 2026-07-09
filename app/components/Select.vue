@@ -44,6 +44,7 @@ const modelValue = defineModel<T | null>({ default: null })
           <ScrollAreaRoot
             style="--scrollbar-size: 10px"
             class="max-h-[40vh] relative overflow-hidden"
+            type="always"
           >
             <ScrollAreaViewport class="w-full h-full p-1">
               <SelectItem

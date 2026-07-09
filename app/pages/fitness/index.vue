@@ -176,7 +176,7 @@ const DAILY_GOAL = 15
 
 // --- Selected Exercise Improvement ---
 
-const selectedExercise = ref('Incline DB Bench Press')
+const selectedExercise = ref('DB Bench Press')
 // const selectedExercise = ref<StrengthExercise | null>('Incline DB Bench Press')
 
 // --- Year selector for the heatmap ---
@@ -375,30 +375,6 @@ const splitOption = computed(() => {
         </ul>
       </template>
     </div>
-    <div class="lg:col-span-3 xl:col-span-2 card">
-      <h2 class="card-title">
-        <div class="i-mdi:human" />
-        Muscle Diagram
-      </h2>
-      <p class="text-xs opacity-60 mt-1">Last {{ RECENT_WINDOW_DAYS }} days, by sets logged</p>
-      <MuscleHeatmap
-        :days="RECENT_WINDOW_DAYS"
-        :strength-exercises="strengthExercises ?? []"
-        class="mt-4"
-      />
-    </div>
-    <div class="lg:col-span-3 xl:col-span-4 card">
-      <h2 class="card-title">
-        <div class="i-solar:database-linear" />
-        Muscle Table
-      </h2>
-
-      <p class="text-xs opacity-60 mt-1">
-        Last {{ RECENT_WINDOW_DAYS }} days, select muscle group with the diagram
-      </p>
-    </div>
-    <!-- <div class="lg:col-span-6 card">
-    </div> -->
 
     <!-- Full-width yearly heatmap -->
     <div class="lg:col-span-6 card" ref="heatmapCardRef">
@@ -506,12 +482,48 @@ const splitOption = computed(() => {
       <p class="text-xs mt-1 opacity-90">Last {{ RECENT_WINDOW_DAYS }} days, by sets logged</p>
     </div>
 
+    <!-- Muscle diagram + table -->
+
+    <div class="lg:col-span-3 xl:col-span-2 card">
+      <h2 class="card-title">
+        <div class="i-mdi:human" />
+        Muscle Diagram
+      </h2>
+      <p class="text-xs opacity-60 mt-1">Last {{ RECENT_WINDOW_DAYS }} days, by sets logged</p>
+      <MuscleHeatmap
+        :days="RECENT_WINDOW_DAYS"
+        :strength-exercises="strengthExercises ?? []"
+        class="mt-4"
+      />
+    </div>
+    <div class="lg:col-span-3 xl:col-span-4 card">
+      <h2 class="card-title">
+        <div class="i-solar:database-linear" />
+        Muscle Table
+      </h2>
+
+      <p class="text-xs opacity-60 mt-1">
+        Last {{ RECENT_WINDOW_DAYS }} days, select muscle group with the diagram
+      </p>
+    </div>
+
     <!-- All Workouts -->
 
     <div class="lg:col-span-6 card">
       <h2 class="card-title">
         <div class="i-tabler:layout-grid" />
         Strength Workouts
+        <NuxtLink
+          to="/fitness/table"
+          aria-label="Full Workout Table"
+          title="Full Table"
+          class="ml-auto"
+          target="_blank"
+        >
+          <div
+            class="i-solar:arrow-right-up-line-duotone dark:i-solar:arrow-right-up-bold-duotone text-2xl cursor-pointer"
+          />
+        </NuxtLink>
       </h2>
       <ul class="grid grid-cols-3 xl:grid-cols-4 items-stretch w-full gap-2 mt-4">
         <ExerciseCard

@@ -40,7 +40,7 @@ const navItems = [
         :to="item.to"
         :aria-label="item.label"
         :title="item.label"
-        exact-active-class="bg-stone-800/10 dark:bg-stone-100/10"
+        active-class="bg-stone-800/10 dark:bg-stone-100/10"
         class="block rounded-full transition-colors"
       >
         <IconNavBarWrapper><div :class="item.icon" /></IconNavBarWrapper>
