@@ -41,7 +41,7 @@
       </ComboboxContent>
     </ComboboxRoot>
 
-    <div class="w-3/4 mx-auto mt-8 card">
+    <div class="w-8/9 mx-auto mt-8 card">
       <ClientOnly>
         <ABCRenderer v-if="tuneAbc" :abcNotation="tuneAbc" />
         <template #fallback>
@@ -78,7 +78,7 @@ definePageMeta({ title: 'Sound Island' })
 
 const tuneModules = import.meta.glob('~/assets/data/tunes/*.abc', {
   query: '?raw',
-  import: 'default',
+  //   import: 'default',
 })
 
 const tuneList: Tune[] = Object.keys(tuneModules).map((path) => {

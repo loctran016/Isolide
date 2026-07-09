@@ -31,8 +31,7 @@ function syncEchartsTextColor() {
 }
 
 const { themePref } = useTheme()
-watch(themePref)
-// TODO: Should I use watchEffect
+
 const colorMode = computed(() => themePref.value)
 
 onMounted(syncEchartsTextColor)
@@ -103,10 +102,13 @@ const DAILY_GOAL = 15
 const todayYear = computed(() => parseDate(todayDate.value).year)
 
 // ✅ Correct
-const selectedYear = ref(null)
-onMounted(() => {
-  selectedYear.value = todayYear.value
-})
+// const selectedYear = ref(null)
+// onMounted(() => {
+//   selectedYear.value = todayYear.value
+// })
+
+const selectedYear = useState('fitness-selected-year', () => todayYear.value)
+
 const availableYears = computed(() => {
   const years = new Set([todayYear.value]) // use pinned value
   for (const item of strengthExercises.value ?? []) {
@@ -212,27 +214,35 @@ function formatIsoDateHeatmap(iso) {
 
 const hasSplitData = computed(() => splitTotals.value.push + splitTotals.value.pull > 0)
 
-const splitOption = computed(() => ({
-  tooltip: { trigger: 'item', formatter: '{b}: {c} sets ({d}%)' },
-  legend: {
-    bottom: 0,
-    itemWidth: 10,
-    itemHeight: 10,
-    textStyle: { fontSize: 11, color: colorMode.value === 'dark' || window.matchMedia('(prefers-color-scheme: dark)') ? '#e7e5e4' : '#44403c' },
-  },
-  series: [
-    {
-      type: 'pie',
-      radius: ['55%', '75%'],
-      center: ['50%', '42%'],
-      label: { show: false },
-      data: [
-        { value: splitTotals.value.pull, name: 'Pull', itemStyle: { color: '#a855f7' } },
-        { value: splitTotals.value.push, name: 'Push', itemStyle: { color: '#ec4899' } },
-      ],
+const splitOption = computed(() => {
+  const isDark =
+    colorMode.value === 'dark' ||
+    (colorMode.value === 'system' &&
+      import.meta.client &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches)
+
+  return {
+    tooltip: { trigger: 'item', formatter: '{b}: {c} sets ({d}%)' },
+    legend: {
+      bottom: 0,
+      itemWidth: 10,
+      itemHeight: 10,
+      textStyle: { fontSize: 11, color: isDark ? '#e7e5e4' : '#44403c' },
     },
-  ],
-}))
+    series: [
+      {
+        type: 'pie',
+        radius: ['55%', '75%'],
+        center: ['50%', '42%'],
+        label: { show: false },
+        data: [
+          { value: splitTotals.value.pull, name: 'Pull', itemStyle: { color: '#a855f7' } },
+          { value: splitTotals.value.push, name: 'Push', itemStyle: { color: '#ec4899' } },
+        ],
+      },
+    ],
+  }
+})
 </script>
 
 <template>
