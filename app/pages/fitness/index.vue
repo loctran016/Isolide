@@ -329,24 +329,9 @@ const splitOption = computed(() => {
     <!-- <WeeklySplit class="lg:col-span-6 card" /> -->
     <div class="lg:col-span-4 card">
       <h2 class="card-title">
-        <div class="i-healthicons:exercise-weights text-lg" />
-        Today workouts
+        <div class="i-solar:graph-new-up-bold text-lg" />
+        Improvements
       </h2>
-      <ul class="grid grid-cols-2 lg:grid-cols-3 items-stretch w-full gap-2 mt-4">
-        <ExerciseCard
-          v-for="items in todayStrengthExercises"
-          :key="items.id"
-          :exercise="items"
-          variant="today"
-        />
-        <StrengthForm>
-          <li
-            v-if="todayStrengthExercises.length < 3"
-            class="border-stone-900/30 hover:border-stone-900/50 dark:border-stone-100/20 dark:hover:border-white/40 border-1 border-dashed flex items-center justify-center duration-200 w-full border-rounded-md cursor-pointer p-4 min-h-36 hover:text-black dark:hover:text-white"
-          >
-            <div class="i-mdi:plus" /></li
-        ></StrengthForm>
-      </ul>
     </div>
     <div class="lg:col-span-2 card">
       <h2 class="card-title flex flex-col items-start gap-1">
@@ -390,7 +375,7 @@ const splitOption = computed(() => {
     <div class="lg:col-span-3 xl:col-span-2 card">
       <h2 class="card-title">
         <div class="i-mdi:human" />
-        Muscle focus
+        Muscle Diagram
       </h2>
       <p class="text-xs opacity-60 mt-1">Last {{ RECENT_WINDOW_DAYS }} days, by sets logged</p>
       <MuscleHeatmap
@@ -399,17 +384,15 @@ const splitOption = computed(() => {
         class="mt-4"
       />
     </div>
-    <div class="lg:col-span-4 card">
-      <!-- <h2 class="card-title">
-        <div class="i-mdi:human" />
-        Muscle focus
+    <div class="lg:col-span-3 xl:col-span-4 card">
+      <h2 class="card-title">
+        <div class="i-solar:database-linear" />
+        Muscle Table
       </h2>
-      <p class="text-xs opacity-60 mt-1">Last {{ RECENT_WINDOW_DAYS }} days, by sets logged</p>
-      <MuscleHeatmap
-        :days="RECENT_WINDOW_DAYS"
-        :strength-exercises="strengthExercises ?? []"
-        class="mt-4"
-      /> -->
+
+      <p class="text-xs opacity-60 mt-1">
+        Last {{ RECENT_WINDOW_DAYS }} days, select muscle group with the diagram
+      </p>
     </div>
     <!-- <div class="lg:col-span-6 card">
     </div> -->
