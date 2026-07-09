@@ -300,7 +300,7 @@ const splitOption = computed(() => {
       bottom: 0,
       itemWidth: 10,
       itemHeight: 10,
-      textStyle: { fontSize: 11, color: isDark ? '#e7e5e4' : '#44403c' },
+      textStyle: { fontSize: 11, color: isDark.value ? '#e7e5e4' : '#44403c' },
     },
     series: [
       {
@@ -309,8 +309,9 @@ const splitOption = computed(() => {
         center: ['50%', '42%'],
         label: { show: false },
         data: [
-          { value: splitTotals.value.pull, name: 'Pull', itemStyle: { color: '#a855f7' } },
+          
           { value: splitTotals.value.push, name: 'Push', itemStyle: { color: '#ec4899' } },
+          { value: splitTotals.value.pull, name: 'Pull', itemStyle: { color: '#a855f7' } },
         ],
       },
     ],
