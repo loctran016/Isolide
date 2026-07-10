@@ -13,24 +13,20 @@ const emit = defineEmits<{ select: [groups: MuscleGroup[]] }>()
 const TIME_ZONE = 'Asia/Ho_Chi_Minh'
 
 const MUSCLE_MAP: Record<MuscleGroup, { front?: string[]; back?: string[] }> = {
-  'Upper chest': { front: ['pectoralis_minor'] },
-  'Middle chest': { front: ['pectoralis_major'] },
-  'Lower chest': { front: ['pectoralis_major'] },
+  'Upper chest': { front: ['pectoralis_major'] },
+  'Middle chest': { front: ['pectoralis_minor'] },
+  'Lower chest': { front: ['pectoralis_minor'] },
   'Front delts': { front: ['deltoid_anterior_head'] },
   'Side delts': { front: ['deltoid_middle_head'], back: ['deltoid_middle_head'] },
   'Rear delts': { back: ['deltoid_posterior_head'] },
-  Abs: {
-    front: [
-      'rectus_abdominis',
-      'tendinous_inscriptions_upper',
-      'tendinous_inscriptions_middle',
-      'tendinous_inscriptions_lower',
-      'obliques_upper',
-      'obliques_lower',
-    ],
-  },
+  'Upper Abs': { front: ['tendinous_inscriptions_upper', 'tendinous_inscriptions_middle'] },
+  'Lower Abs': { front: ['tendinous_inscriptions_lower', 'rectus_abdominis'] },
+  Obliques: { front: ['obliques_upper', 'obliques_lower'] },
   Lats: { back: ['latissimus_dorsi'] },
-  Traps: { front: ['trapezius'], back: ['trapezius_upper', 'trapezius'] },
+  Traps: {
+    front: ['trapezius'],
+    back: ['trapezius_upper', 'trapezius', 'infraspinatus', 'teres_major'],
+  },
   'Lower back': { back: ['erector_spinae'] },
   Forearm: {
     front: ['brachioradialis', 'flexor_carpi_ulnaris', 'extensor_carpi_ulnaris'],
@@ -40,8 +36,6 @@ const MUSCLE_MAP: Record<MuscleGroup, { front?: string[]; back?: string[] }> = {
   Biceps: { front: ['biceps_brachii_long_head', 'biceps_brachii_short_head'] },
 }
 
-// Reverse lookup: a path id like "pectoralis_major" maps back to every
-// MuscleGroup that shares it (Middle chest AND Lower chest).
 const PATH_TO_GROUPS = computed(() => {
   const map: Record<string, MuscleGroup[]> = {}
   for (const [group, sides] of Object.entries(MUSCLE_MAP) as [
@@ -84,7 +78,17 @@ const volumeByPathId = computed(() => {
 })
 
 const maxPathVolume = computed(() => Math.max(1, ...Object.values(volumeByPathId.value)))
-const selectedPathId = ref<string | null>(null)
+const selectedGroups = ref<MuscleGroup[]>([])
+
+const highlightedPathIds = computed(() => {
+  const ids = new Set<string>()
+  for (const group of selectedGroups.value) {
+    const sides = MUSCLE_MAP[group]
+    if (!sides) continue
+    for (const id of [...(sides.front ?? []), ...(sides.back ?? [])]) ids.add(id)
+  }
+  return ids
+})
 
 function colorForVolume(volume: number) {
   if (volume === 0) return null
@@ -100,7 +104,7 @@ const isMounted = ref(false)
 function handlePathClick(id: string) {
   const groups = PATH_TO_GROUPS.value[id]
   if (!groups) return
-  selectedPathId.value = id
+  selectedGroups.value = groups
   emit('select', groups)
 }
 
@@ -110,6 +114,7 @@ function paint(container: HTMLDivElement | null, side: 'front' | 'back') {
   for (const sides of Object.values(MUSCLE_MAP)) {
     for (const id of sides[side] ?? []) idsForSide.add(id)
   }
+
   for (const id of idsForSide) {
     const el = container.querySelector<SVGPathElement>(`#${id}`)
     if (!el) continue
@@ -118,10 +123,9 @@ function paint(container: HTMLDivElement | null, side: 'front' | 'back') {
     if (color) el.style.fill = color
     else el.style.removeProperty('fill')
 
-    el.style.stroke = id === selectedPathId.value ? '#a855f7' : 'transparent'
-    el.style.strokeWidth = id === selectedPathId.value ? '1.5' : '0'
+    el.classList.add('clickable')
+    el.classList.toggle('selected', highlightedPathIds.value.has(id))
 
-    // avoid stacking duplicate listeners on repeated repaint() calls
     el.removeEventListener('click', (el as any)._muscleClickHandler)
     const handler = () => handlePathClick(id)
     ;(el as any)._muscleClickHandler = handler
@@ -140,7 +144,7 @@ onMounted(() => {
 })
 
 watch(volumeByPathId, () => nextTick(repaint))
-watch(selectedPathId, () => nextTick(repaint))
+watch(selectedGroups, () => nextTick(repaint))
 </script>
 
 <template>
@@ -154,13 +158,29 @@ watch(selectedPathId, () => nextTick(repaint))
 <style scoped>
 .body-map :deep(path) {
   fill: rgba(41, 37, 36, 0.22);
+  stroke: transparent;
+  stroke-width: 0;
+  cursor: default;
   transition:
     fill 200ms ease,
     stroke 200ms ease;
-  cursor: pointer;
 }
 
 html.dark .body-map :deep(path) {
   fill: rgba(255, 255, 255, 0.22);
+}
+
+.body-map :deep(path.clickable) {
+  cursor: pointer;
+}
+
+.body-map :deep(path.clickable:hover) {
+  stroke: rgba(168, 85, 247, 0.35);
+  stroke-width: 1.5px;
+}
+
+.body-map :deep(path.selected) {
+  stroke: #a855f7 !important;
+  stroke-width: 2px !important;
 }
 </style>

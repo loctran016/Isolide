@@ -402,8 +402,9 @@ const splitOption = computed(() => {
 
     <!-- Streak + split, side by side below -->
 
-    <div class="lg:col-span-2 h-76 card">
+    <div class="lg:col-span-2 h-76 card flex flex-col">
       <h2 class="card-title !text-base mb-2">Weight & BF</h2>
+      <BodyMetricsChart :is-dark="isDark" class="flex-1 min-h-0" />
     </div>
 
     <div class="lg:col-span-1 flex flex-col gap-4 text-gray-800 dark:text-gray-100">

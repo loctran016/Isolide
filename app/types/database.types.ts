@@ -5,7 +5,9 @@ export type MuscleGroup =
   | 'Front delts'
   | 'Side delts'
   | 'Rear delts'
-  | 'Abs'
+  | 'Upper Abs'
+  | 'Lower Abs'
+  | 'Obliques'
   | 'Lats'
   | 'Traps'
   | 'Lower back'
@@ -327,8 +329,8 @@ export const EXERCISE_TO_MUSCLES = {
   'Flat Barbell Bench Press': ['Middle chest', 'Front delts', 'Triceps'],
   'Incline Barbell Bench Press': ['Upper chest', 'Front delts', 'Triceps'],
   'Decline Barbell Bench Press': ['Lower chest', 'Triceps'],
-  'Push-Up': ['Middle chest', 'Front delts', 'Triceps', 'Abs'],
-  'Weighted Push-Up': ['Middle chest', 'Front delts', 'Triceps', 'Abs'],
+  'Push-Up': ['Middle chest', 'Front delts', 'Triceps', 'Upper Abs'],
+  'Weighted Push-Up': ['Middle chest', 'Front delts', 'Triceps', 'Upper Abs'],
   'Chest Dip': ['Lower chest', 'Triceps', 'Front delts'],
   'Machine Chest Press': ['Middle chest', 'Front delts', 'Triceps'],
   'Cable Fly': ['Middle chest'],
@@ -369,21 +371,21 @@ export const EXERCISE_TO_MUSCLES = {
   'DB Shrug': ['Traps', 'Forearm'],
   'Barbell Shrug': ['Traps', 'Forearm'],
   'Trap Bar Shrug': ['Traps', 'Forearm'],
-  'Farmer Carry': ['Traps', 'Forearm', 'Abs'],
+  'Farmer Carry': ['Traps', 'Forearm', 'Obliques'],
   'High Pull': ['Traps', 'Side delts'],
 
   // Lower back / posterior chain
-  'Conventional Deadlift': ['Lower back', 'Traps', 'Forearm', 'Abs'],
+  'Conventional Deadlift': ['Lower back', 'Traps', 'Forearm', 'Lower Abs'],
   'Romanian Deadlift': ['Lower back', 'Forearm'],
+  'Good Morning': ['Lower back', 'Lower Abs'],
   'Back Extension': ['Lower back'],
-  'Good Morning': ['Lower back', 'Abs'],
   'Superman Hold': ['Lower back'],
 
   // Forearm
   'Wrist Curl': ['Forearm'],
   'Reverse Wrist Curl': ['Forearm'],
   'Hammer Curl': ['Biceps', 'Forearm'],
-  'Farmer Hold': ['Forearm', 'Traps', 'Abs'],
+  'Farmer Hold': ['Forearm', 'Traps', 'Obliques'],
   'Plate Pinch Hold': ['Forearm'],
 
   // Triceps
@@ -459,14 +461,9 @@ export const MUSCLE_TO_EXERCISES: Record<MuscleGroup, StrengthExercise[]> = {
     'Cable Rear Delt Fly',
     'Chest-Supported Rear Delt Raise',
   ],
-  Abs: [
-    'Push-Up',
-    'Weighted Push-Up',
-    'Farmer Carry',
-    'Conventional Deadlift',
-    'Good Morning',
-    'Farmer Hold',
-  ],
+  'Upper Abs': ['Push-Up', 'Weighted Push-Up'],
+  'Lower Abs': ['Conventional Deadlift', 'Good Morning'],
+  Obliques: ['Farmer Carry', 'Farmer Hold'],
   Lats: [
     'Pull-Up',
     'Chin-Up',
