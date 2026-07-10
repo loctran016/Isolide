@@ -1,82 +1,96 @@
 <script setup lang="ts">
-import type { CloudinaryPhoto } from '~/server/api/gallery.get'
+import type { CloudinaryPhoto } from '~~/server/api/gallery.get'
 
-// useHead({ title: 'Gallery' })
-
-// app/pages/musical.vue
 definePageMeta({ title: 'Light Island' })
 
 const { data: photos, status } = await useFetch<CloudinaryPhoto[]>('/api/gallery')
 
-// folder -> tag -> photos[], both levels sorted alphabetically
-const grouped = computed(() => {
-  const byFolder = new Map<string, Map<string, CloudinaryPhoto[]>>()
+const ALL = 'All'
+const UNTAGGED = 'Untagged'
 
+// category = folder, kept as its own filter axis (per your rename)
+const categories = computed(() => {
+  const unique = [...new Set((photos.value ?? []).map((p) => p.folder))].sort((a, b) =>
+    a.localeCompare(b),
+  )
+  return [ALL, ...unique]
+})
+
+// tag, filtered independently from category
+const tags = computed(() => {
+  const unique = new Set<string>()
   for (const photo of photos.value ?? []) {
-    const folderKey = photo.folder
-    if (!byFolder.has(folderKey)) byFolder.set(folderKey, new Map())
-    const byTag = byFolder.get(folderKey)!
-
-    // A photo with multiple tags appears once per tag section.
-    // If you'd rather each photo show up only once, swap this
-    // for: const tagKeys = [photo.tags[0] ?? 'Untagged']
-    const tagKeys = photo.tags.length ? photo.tags : ['Untagged']
-    for (const tag of tagKeys) {
-      if (!byTag.has(tag)) byTag.set(tag, [])
-      byTag.get(tag)!.push(photo)
-    }
+    if (photo.tags.length) photo.tags.forEach((t) => unique.add(t))
+    else unique.add(UNTAGGED)
   }
+  return [ALL, ...[...unique].sort((a, b) => a.localeCompare(b))]
+})
 
-  return [...byFolder.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([folder, tagMap]) => ({
-      folder,
-      tagGroups: [...tagMap.entries()]
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([tag, items]) => ({ tag, items })),
-    }))
+const selectedCategory = ref(ALL)
+const selectedTag = ref(ALL)
+
+const filteredPhotos = computed(() => {
+  return (photos.value ?? []).filter((photo) => {
+    const matchesCategory =
+      selectedCategory.value === ALL || photo.folder === selectedCategory.value
+    const matchesTag =
+      selectedTag.value === ALL ||
+      (selectedTag.value === UNTAGGED ? !photo.tags.length : photo.tags.includes(selectedTag.value))
+    return matchesCategory && matchesTag
+  })
 })
 </script>
-
 <template>
-  <div class="max-w-6xl mx-auto px-4 py-20 space-y-12 font-sans dark:text-gray-100">
-    <h1 class="text-2xl font-semibold font-head">Gallery</h1>
+  <div class="mx-auto px-10 w-full mt-4 space-y-6 font-sans dark:text-gray-100 card">
+    <div class="flex items-center justify-between flex-wrap gap-4">
+      <h2 class="text-2xl font-semibold font-head">Gallery</h2>
+
+      <ClientOnly>
+        <div class="flex items-center gap-3">
+          <Select v-model="selectedCategory" :options="categories" />
+          <Select v-model="selectedTag" :options="tags" />
+        </div>
+        <template #fallback>
+          <div class="flex items-center gap-3">
+            <div
+              class="h-9 w-28 rounded-xl border border-white/40 dark:border-white/10 bg-white/30 dark:bg-stone-700/10 animate-pulse"
+            />
+            <div
+              class="h-9 w-28 rounded-xl border border-white/40 dark:border-white/10 bg-white/30 dark:bg-stone-700/10 animate-pulse"
+            />
+          </div>
+        </template>
+      </ClientOnly>
+    </div>
 
     <p v-if="status === 'pending'" class="text-stone-500 dark:text-stone-400">Loading photos…</p>
 
-    <section v-for="group in grouped" :key="group.folder" class="space-y-6">
-      <h2
-        class="text-xl font-medium capitalize border-b border-stone-800/10 dark:border-stone-100/10 pb-2"
-      >
-        {{ group.folder }}
-      </h2>
+    <MasonryWall
+      v-else-if="filteredPhotos.length"
+      :items="filteredPhotos"
+      :column-width="220"
+      :gap="12"
+      :ssr-columns="2"
+      :min-columns="1"
+    >
+      <template #default="slotProps">
+        <CldImage
+          v-if="slotProps?.item"
+          :src="slotProps.item.publicId"
+          :width="400"
+          :height="Math.round((slotProps.item.height / (slotProps.item.width || 1)) * 400)"
+          crop="limit"
+          format="auto"
+          quality="auto"
+          loading="lazy"
+          :alt="slotProps.item.publicId"
+          class="rounded-lg w-full block"
+        />
+      </template>
+    </MasonryWall>
 
-      <div v-for="tagGroup in group.tagGroups" :key="tagGroup.tag" class="space-y-3">
-        <h3 class="text-sm uppercase tracking-wide text-stone-500 dark:text-stone-400">
-          {{ tagGroup.tag }}
-        </h3>
-
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          <CldImage
-            v-for="photo in tagGroup.items"
-            :key="`${tagGroup.tag}-${photo.publicId}`"
-            :src="photo.publicId"
-            :width="400"
-            :height="400"
-            crop="fill"
-            gravity="auto"
-            format="auto"
-            quality="auto"
-            loading="lazy"
-            :alt="photo.publicId"
-            class="rounded-lg object-cover w-full aspect-square"
-          />
-        </div>
-      </div>
-    </section>
-
-    <p v-if="status === 'success' && !photos?.length" class="text-stone-500 dark:text-stone-400">
-      No photos found in your Cloudinary library yet.
+    <p v-else class="text-stone-500 dark:text-stone-400">
+      No photos match {{ selectedCategory }} / {{ selectedTag }}.
     </p>
   </div>
 </template>

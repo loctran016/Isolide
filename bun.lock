@@ -12,6 +12,7 @@
         "@tanstack/vue-table": "^8.21.3",
         "@vite-pwa/nuxt": "1.1.1",
         "@vueuse/nuxt": "14.3.0",
+        "@yeger/vue-masonry-wall": "^6.1.4",
         "abcjs": "^6.6.3",
         "cloudinary": "^2.10.0",
         "dayjs": "^1.11.21",
@@ -1020,6 +1021,10 @@
     "@xtuc/ieee754": ["@xtuc/ieee754@1.2.0", "", {}, "sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA=="],
 
     "@xtuc/long": ["@xtuc/long@4.2.2", "", {}, "sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ=="],
+
+    "@yeger/debounce": ["@yeger/debounce@2.0.20", "", {}, "sha512-vvHS5wMR2MHCXLGcOzcbYR//ZVKpy16LAjzWh9ZLO2ozre8BlF60W7eDGFR/F+pCGPBsLQHzX6pGvt73IQQasA=="],
+
+    "@yeger/vue-masonry-wall": ["@yeger/vue-masonry-wall@6.1.4", "", { "dependencies": { "@yeger/debounce": "2.0.20" }, "peerDependencies": { "vue": "^3.5.19" } }, "sha512-ApJO9NRuYOT8GvjNfz3RHiJ28E1gNPycn5e8liDPhtv8JM8q74UPDWCZ8CVBNvXju6SYELAMAG/svbK7mpV24A=="],
 
     "abbrev": ["abbrev@3.0.1", "", {}, "sha512-AO2ac6pjRB3SJmGJo+v5/aK6Omggp6fsLrs6wN9bd35ulu4cCwaAU9+7ZhXjeqHVkaHThLuzH0nZr0YpCDhygg=="],
 
