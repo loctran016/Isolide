@@ -525,7 +525,7 @@ const splitOption = computed(() => {
         <div class="i-tabler:layout-grid" />
         Strength Workouts
         <NuxtLink
-          to="/fitness/table"
+          to="/fitness/analytics"
           aria-label="Full Workout Table"
           title="Full Table"
           class="ml-auto"

@@ -39,6 +39,29 @@ const filteredPhotos = computed(() => {
     return matchesCategory && matchesTag
   })
 })
+const lightboxImgs = computed(() =>
+  filteredPhotos.value.map((photo) => {
+    const { url } = useCldImageUrl({
+      options: {
+        src: photo.publicId,
+        width: 1600,
+        crop: 'limit',
+        format: 'auto',
+        quality: 'auto',
+      },
+    })
+    return { src: unref(url), title: photo.publicId }
+  }),
+)
+const lightboxVisible = ref(false)
+const lightboxIndex = ref(0)
+
+function openLightbox(publicId: string) {
+  const idx = filteredPhotos.value.findIndex((p) => p.publicId === publicId)
+  if (idx === -1) return
+  lightboxIndex.value = idx
+  lightboxVisible.value = true
+}
 </script>
 <template>
   <div class="mx-auto px-10 w-full mt-4 space-y-6 font-sans dark:text-gray-100 card">
@@ -74,23 +97,37 @@ const filteredPhotos = computed(() => {
       :min-columns="1"
     >
       <template #default="slotProps">
-        <CldImage
+        <button
           v-if="slotProps?.item"
-          :src="slotProps.item.publicId"
-          :width="400"
-          :height="Math.round((slotProps.item.height / (slotProps.item.width || 1)) * 400)"
-          crop="limit"
-          format="auto"
-          quality="auto"
-          loading="lazy"
-          :alt="slotProps.item.publicId"
-          class="rounded-lg w-full block"
-        />
+          type="button"
+          class="block w-full focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2 rounded-lg outline-none"
+          @click="openLightbox(slotProps.item.publicId)"
+        >
+          <CldImage
+            :src="slotProps.item.publicId"
+            :width="400"
+            :height="Math.round((slotProps.item.height / (slotProps.item.width || 1)) * 400)"
+            crop="limit"
+            format="auto"
+            quality="auto"
+            loading="lazy"
+            :alt="slotProps.item.publicId"
+            class="rounded-lg w-full block cursor-zoom-in hover:opacity-90 transition-opacity"
+          />
+        </button>
       </template>
     </MasonryWall>
-
     <p v-else class="text-stone-500 dark:text-stone-400">
       No photos match {{ selectedCategory }} / {{ selectedTag }}.
     </p>
+
+    <Teleport to="body">
+      <VueEasyLightbox
+        :visible="lightboxVisible"
+        :imgs="lightboxImgs"
+        :index="lightboxIndex"
+        @hide="lightboxVisible = false"
+      />
+    </Teleport>
   </div>
 </template>
