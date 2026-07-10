@@ -1,6 +1,8 @@
 <script setup>
 import { parseDateTime, today, parseDate } from '@internationalized/date'
 import { EXERCISE_TO_SPLIT, STRENGTH_EXERCISES } from '~/types/database.types'
+import { usePreferredDark } from '@vueuse/core'
+
 useHead({
   title: 'Body Island',
   meta: [{ name: 'description', content: 'Activity and metric logs.' }],
@@ -25,12 +27,10 @@ const colorMode = computed(() => themePref.value)
 // only ever read inside <ClientOnly>-rendered chart options, or passed
 // as a prop into a component that's itself only mounted client-side —
 // never used to drive SSR'd DOM directly.
+const prefersDark = usePreferredDark()
+
 const isDark = computed(
-  () =>
-    colorMode.value === 'dark' ||
-    (colorMode.value === 'system' &&
-      import.meta.client &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches),
+  () => colorMode.value === 'dark' || (colorMode.value === 'system' && prefersDark.value),
 )
 
 onMounted(syncEchartsTextColor)
@@ -309,7 +309,6 @@ const splitOption = computed(() => {
         center: ['50%', '42%'],
         label: { show: false },
         data: [
-          
           { value: splitTotals.value.push, name: 'Push', itemStyle: { color: '#ec4899' } },
           { value: splitTotals.value.pull, name: 'Pull', itemStyle: { color: '#a855f7' } },
         ],
