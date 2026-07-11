@@ -88,7 +88,7 @@ function openLightbox(publicId: string) {
 
     <p v-if="status === 'pending'" class="text-stone-500 dark:text-stone-400">Loading photos…</p>
 
-    <LazyMasonryWall
+    <MasonryWall
       v-else-if="filteredPhotos.length"
       :items="filteredPhotos"
       :column-width="220"
@@ -117,7 +117,7 @@ function openLightbox(publicId: string) {
           />
         </button>
       </template>
-    </LazyMasonryWall>
+    </MasonryWall>
     <p v-else class="text-stone-500 dark:text-stone-400">
       No photos match {{ selectedCategory }} / {{ selectedTag }}.
     </p>
