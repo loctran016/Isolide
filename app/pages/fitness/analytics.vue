@@ -151,7 +151,7 @@ const cardioChartOption = computed(() => {
 
 <template>
   <div class="grid lg:grid-cols-2 gap-4 px-4 py-4 mx-auto font-sans dark:text-gray-100">
-      <div class="card">
+      <!-- <div class="card"> -->
         <h2 class="card-title !text-base mb-2">Cardio duration</h2>
         <ClientOnly>
           <VChart :option="cardioChartOption" autoresize class="h-56 w-full" />
@@ -165,7 +165,6 @@ const cardioChartOption = computed(() => {
         <h2 class="card-title !text-base mb-2">Weight & BF</h2>
         <BodyMetricsChart :is-dark="isDark" class="flex-1 min-h-0" />
       </div>
-    </div>
 
     <div class="card lg:col-span-2">
       <h2 class="card-title mb-3">Strength log</h2>
