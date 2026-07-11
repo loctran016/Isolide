@@ -23,7 +23,7 @@ const bpm = ref(100)
 const beatsPerBar = ref(4)
 const accentFirstBeat = ref(true)
 const soundMode = ref<SoundMode>('wood')
-
+const buttonRef = ref<HTMLButtonElement | null>(null)
 // visual-only beat indicator
 const currentBeat = ref(0)
 
@@ -285,19 +285,19 @@ watch([bpm, beatsPerBar, accentFirstBeat, soundMode], () => {
     )
   } catch {}
 })
-// watch([bpm, beatsPerBar, accentFirstBeat, soundMode], () => {
-//   try {
-//     localStorage.setItem(
-//       STORAGE_KEY,
-//       JSON.stringify({
-//         bpm: bpm.value,
-//         beatsPerBar: beatsPerBar.value,
-//         accentFirstBeat: accentFirstBeat.value,
-//         soundMode: soundMode.value,
-//       }),
-//     )
-//   } catch {}
-// })
+
+function unlockOnFirstInteraction() {
+  ensureAudioContext()
+  audioCtx?.resume().catch(() => {})
+}
+
+onMounted(() => {
+  buttonRef.value?.addEventListener('pointerdown', unlockOnFirstInteraction, { once: true })
+})
+
+onBeforeUnmount(() => {
+  buttonRef.value?.removeEventListener('pointerdown', unlockOnFirstInteraction)
+})
 
 // BPM / meter changes should be reflected immediately while playing
 watch(bpm, restartIfPlaying)
@@ -323,6 +323,7 @@ onBeforeUnmount(() => {
   <ContextMenuRoot>
     <ContextMenuTrigger as-child>
       <button
+        ref="buttonRef"
         class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium card text-color active:scale-[0.98] transition select-none"
         @click="toggle"
       >

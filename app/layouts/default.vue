@@ -47,7 +47,7 @@ useHead({
       </ScrollAreaScrollbar>
     </ScrollAreaRoot>
 
-    <NuxtPwaManifest />
+    <NuxtPwaAssets />
   </div>
 </template>
 
