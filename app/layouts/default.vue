@@ -42,7 +42,7 @@ useHead({
       </ScrollAreaViewport>
       <ScrollAreaScrollbar
         style="top: 3.5rem"
-        class="top-3rem lg:top-4.1875rem absolute right-0 bottom-0 flex select-none touch-none p-0.5 z-20 transition-colors duration-[160ms] ease-out data-[orientation=vertical]:w-2 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-2"
+        class="top-3.5rem lg:top-4.1875rem absolute right-0 bottom-0 flex select-none touch-none p-0.5 z-20 transition-colors duration-[160ms] ease-out data-[orientation=vertical]:w-2 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-2"
         orientation="vertical"
       >
         <ScrollAreaThumb
