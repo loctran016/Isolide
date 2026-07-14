@@ -87,7 +87,6 @@ async function toggleHabit(key: string) {
 function calculateStreak(dates: string[]): number {
   if (dates.length === 0) return 0
 
-  // Sort dates descending
   const sortedDates = [...dates].sort((a, b) => b.localeCompare(a))
   const todayStr = todayIso.value
   const todayDate = parseDate(todayStr)
@@ -95,9 +94,8 @@ function calculateStreak(dates: string[]): number {
   let streak = 0
   let currentDate = todayDate
 
-  // Check if today is completed, if not, start from yesterday
   if (!sortedDates.includes(todayStr)) {
-    currentDate = todayDate.subtract({ days: 1 })
+    currentDate = currentDate.subtract({ days: 1 })
   }
 
   while (true) {
@@ -113,31 +111,25 @@ function calculateStreak(dates: string[]): number {
   return streak
 }
 
-// Get completed dates for each habit
-const skincareCompletedDates = computed(() => {
-  const dates = new Set<string>()
-  for (const iso of Object.keys(skincareCounts.value)) {
-    // Skincare counts as completed if both AM & PM done (count = 2)
-    if (skincareCounts.value[iso] === 2) {
-      dates.add(iso)
-    }
-  }
-  return [...dates]
-})
+// --- Stats for side cards ---
 
 const pianoCompletedDates = computed(() => {
   return Object.keys(pianoCounts.value).filter((iso) => pianoCounts.value[iso] > 0)
 })
 
-const pennywortCompletedDates = computed(() => {
-  return Object.keys(pennywortCounts.value).filter((iso) => pennywortCounts.value[iso] > 0)
+// Each piano session = 15 minutes
+const PIANO_SESSION_MINUTES = 15
+
+const pianoTotalMinutes = computed(() => pianoCompletedDates.value.length * PIANO_SESSION_MINUTES)
+
+const pianoTotalHours = computed(() => {
+  const hours = Math.floor(pianoTotalMinutes.value / 60)
+  const minutes = pianoTotalMinutes.value % 60
+  if (hours === 0) return `${minutes}m`
+  if (minutes === 0) return `${hours}h`
+  return `${hours}h ${minutes}m`
 })
 
-// Calculate streaks
-const skincareStreak = computed(() => calculateStreak(skincareCompletedDates.value))
-const pianoStreak = computed(() => calculateStreak(pianoCompletedDates.value))
-
-// Pennywort: count completions this week (Mon-Sun)
 const pennywortThisWeek = computed(() => {
   const todayDate = parseDate(todayIso.value)
   const dayOfWeek = todayDate.toDate(TIME_ZONE).getDay()
@@ -153,87 +145,20 @@ const pennywortThisWeek = computed(() => {
   return count
 })
 
-// Overall completion rate (all habits combined, last 30 days)
-const overallCompletionRate = computed(() => {
-  const todayDate = parseDate(todayIso.value)
-  const cutoff = todayDate.subtract({ days: 30 })
-
-  let totalPossible = 0
-  let totalCompleted = 0
-
-  for (let i = 0; i < 30; i++) {
-    const date = cutoff.add({ days: i })
-    const iso = `${date.year}-${String(date.month).padStart(2, '0')}-${String(date.day).padStart(2, '0')}`
-
-    // Skincare (AM + PM = 2 possible per day)
-    totalPossible += 2
-    totalCompleted += skincareCounts.value[iso] ?? 0
-
-    // Piano (1 possible per day)
-    totalPossible += 1
-    totalCompleted += pianoCounts.value[iso] ?? 0
-
-    // Pennywort (1 possible per day)
-    totalPossible += 1
-    totalCompleted += pennywortCounts.value[iso] ?? 0
-  }
-
-  return totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0
+const pennywortTotalDays = computed(() => {
+  return Object.keys(pennywortCounts.value).filter((iso) => pennywortCounts.value[iso] > 0).length
 })
 </script>
 
 <template>
   <div
-    class="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 my-2 py-4 mx-auto font-sans dark:text-gray-100"
+    class="grid grid-cols-1 md:grid-cols-4 gap-4 px-4 my-2 py-4 mx-auto font-sans dark:text-gray-100"
   >
-    <!-- Stats Cards -->
-    <div class="col-span-full grid grid-cols-2 md:grid-cols-4 gap-3">
-      <!-- Skincare streak -->
-      <div class="card !p-4 flex flex-col items-center justify-center gap-1">
-        <div class="flex items-center gap-1.5">
-          <div class="i-solar:leaf-bold text-lg text-purple-500" />
-          <span class="text-2xl font-bold text-purple-500">{{ skincareStreak }}</span>
-        </div>
-        <div class="text-xs opacity-60">day streak</div>
-        <div class="text-[11px] opacity-40">skincare</div>
-      </div>
-
-      <!-- Piano streak -->
-      <div class="card !p-4 flex flex-col items-center justify-center gap-1">
-        <div class="flex items-center gap-1.5">
-          <div class="i-solar:piano-bold text-lg text-blue-500" />
-          <span class="text-2xl font-bold text-blue-500">{{ pianoStreak }}</span>
-        </div>
-        <div class="text-xs opacity-60">day streak</div>
-        <div class="text-[11px] opacity-40">piano</div>
-      </div>
-
-      <!-- Pennywort this week -->
-      <div class="card !p-4 flex flex-col items-center justify-center gap-1">
-        <div class="flex items-center gap-1.5">
-          <div class="i-solar:cup-bold text-lg text-emerald-500" />
-          <span class="text-2xl font-bold text-emerald-500">{{ pennywortThisWeek }}/3</span>
-        </div>
-        <div class="text-xs opacity-60">this week</div>
-        <div class="text-[11px] opacity-40">pennywort</div>
-      </div>
-
-      <!-- Overall completion rate -->
-      <div class="card !p-4 flex flex-col items-center justify-center gap-1">
-        <div class="flex items-center gap-1.5">
-          <div class="i-solar:star-rainbow-bold text-lg text-amber-500" />
-          <span class="text-2xl font-bold text-amber-500">{{ overallCompletionRate }}%</span>
-        </div>
-        <div class="text-xs opacity-60">completion</div>
-        <div class="text-[11px] opacity-40">last 30 days</div>
-      </div>
-    </div>
-
     <!-- Skincare: AM + PM, full width -->
     <div class="col-span-full card">
       <div class="flex items-center justify-between">
         <h2 class="card-title">
-          <div class="i-solar:leaf-bold" />
+          <div class="i-mdi:face-man-shimmer" />
           Skincare
         </h2>
         <span class="text-xs opacity-60">AM & PM routine</span>
@@ -268,7 +193,7 @@ const overallCompletionRate = computed(() => {
         </button>
       </div>
 
-      <HabitHeatmap
+      <CalendarHeatmap
         class="mt-6"
         :logs-by-date="skincareCounts"
         :max-value="2"
@@ -279,10 +204,10 @@ const overallCompletionRate = computed(() => {
     </div>
 
     <!-- Piano -->
-    <div class="card">
+    <div class="card col-span-3">
       <div class="flex items-center justify-between">
         <h2 class="card-title">
-          <div class="i-solar:piano-bold" />
+          <div class="i-solar:music-notes-bold" />
           Piano
         </h2>
         <span class="text-xs opacity-60">Daily practice</span>
@@ -293,8 +218,8 @@ const overallCompletionRate = computed(() => {
         class="w-full mt-4 rounded-lg px-4 py-2.5 text-sm font-medium border transition-colors cursor-pointer disabled:opacity-50"
         :class="
           isLoggedToday('piano')
-            ? 'bg-blue-500/20 border-blue-400/50 text-blue-700 dark:text-blue-300'
-            : 'border-stone-800/20 dark:border-stone-100/20 hover:border-blue-400/50'
+            ? 'bg-purple-500/20 border-purple-400/50 text-purple-700 dark:text-purple-300'
+            : 'border-stone-800/20 dark:border-stone-100/20 hover:border-purple-400/50'
         "
         :disabled="pending.piano"
         @click="toggleHabit('piano')"
@@ -302,7 +227,7 @@ const overallCompletionRate = computed(() => {
         {{ isLoggedToday('piano') ? 'Practiced today ✓' : 'Log practice' }}
       </button>
 
-      <HabitHeatmap
+      <CalendarHeatmap
         class="mt-6"
         :logs-by-date="pianoCounts"
         :max-value="1"
@@ -312,11 +237,18 @@ const overallCompletionRate = computed(() => {
       />
     </div>
 
+    <!-- Piano stats card -->
+    <div class="card col-span-1 !p-6 flex flex-col items-center justify-center gap-3">
+      <div class="i-solar:piano-bold-duotone text-6xl opacity-80" />
+      <span class="text-5xl font-bold">{{ pianoTotalHours }}</span>
+      <div class="text-sm opacity-60">total practice</div>
+    </div>
+
     <!-- Pennywort -->
-    <div class="card">
+    <div class="card col-span-3">
       <div class="flex items-center justify-between">
         <h2 class="card-title">
-          <div class="i-solar:cup-bold" />
+          <div class="i-solar:leaf-bold" />
           Pennywort
         </h2>
         <span class="text-xs opacity-60">3x per week goal</span>
@@ -328,7 +260,7 @@ const overallCompletionRate = computed(() => {
         :class="
           isLoggedToday('pennywort')
             ? 'bg-emerald-500/20 border-emerald-400/50 text-emerald-700 dark:text-emerald-300'
-            : 'border-stone-800/20 dark:border-stone-100/20 hover:border-emerald-400/50'
+            : 'border-stone-800/20 dark:border-stone-100/20 hover:border-purple-400/50'
         "
         :disabled="pending.pennywort"
         @click="toggleHabit('pennywort')"
@@ -336,7 +268,7 @@ const overallCompletionRate = computed(() => {
         {{ isLoggedToday('pennywort') ? 'Had it today ✓' : 'Log drink' }}
       </button>
 
-      <HabitHeatmap
+      <CalendarHeatmap
         class="mt-6"
         :logs-by-date="pennywortCounts"
         :max-value="1"
@@ -344,6 +276,13 @@ const overallCompletionRate = computed(() => {
         :is-dark="isDark"
         height="h-36"
       />
+    </div>
+    <!-- Pennywort stats card -->
+    <div class="card col-span-1 !p-6 flex flex-col items-center justify-center gap-3">
+      <div class="i-solar:cup-bold-duotone text-6xl opacity-80" />
+      <span class="text-5xl font-bold">{{ pennywortThisWeek }}/3</span>
+      <div class="text-sm opacity-60">this week</div>
+      <div class="text-xs opacity-40 mt-1">{{ pennywortTotalDays }} total days</div>
     </div>
   </div>
 </template>

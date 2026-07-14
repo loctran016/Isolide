@@ -3,12 +3,13 @@ import { today, parseDate } from '@internationalized/date'
 
 const props = withDefaults(
   defineProps<{
-    logsByDate: Record<string, number> // iso date -> count
-    maxValue: number // max possible per day (1 for single habits, 2 for skincare)
+    logsByDate: Record<string, number>
+    maxValue: number
     color: string
     isDark: boolean
     showYearSelector?: boolean
-    height?: string // css height class
+    selectedYear?: number
+    height?: string
   }>(),
   {
     showYearSelector: false,
@@ -16,14 +17,23 @@ const props = withDefaults(
   },
 )
 
+const emit = defineEmits<{
+  'update:selectedYear': [year: number]
+}>()
+
 const TIME_ZONE = 'Asia/Ho_Chi_Minh'
 
-// Pin today
 const todayDate = today(TIME_ZONE).toString()
 const todayYear = computed(() => parseDate(todayDate).year)
 
-// Year selector (optional)
-const selectedYear = ref(todayYear.value)
+const internalYear = ref(todayYear.value)
+const activeYear = computed({
+  get: () => props.selectedYear ?? internalYear.value,
+  set: (v) => {
+    internalYear.value = v
+    emit('update:selectedYear', v)
+  },
+})
 
 const availableYears = computed(() => {
   const years = new Set([todayYear.value])
@@ -34,9 +44,8 @@ const availableYears = computed(() => {
   return [...years].sort((a, b) => b - a)
 })
 
-// Generate full year heatmap data
 const yearHeatmapData = computed(() => {
-  const year = props.showYearSelector ? selectedYear.value : todayYear.value
+  const year = props.showYearSelector ? activeYear.value : todayYear.value
   const data: [string, number][] = []
   const start = new Date(Date.UTC(year, 0, 1))
   const end = new Date(Date.UTC(year, 11, 31))
@@ -61,22 +70,32 @@ function formatIsoDate(iso: string) {
 
 const chartOption = computed(() => {
   const textColor = props.isDark ? '#e7e5e4' : '#44403c'
-  const year = props.showYearSelector ? selectedYear.value : todayYear.value
+  const year = props.showYearSelector ? activeYear.value : todayYear.value
 
   return {
     tooltip: {
       formatter: (params: any) =>
         `${formatIsoDate(params.value[0])}: ${params.value[1]}/${props.maxValue}`,
+      backgroundColor: props.isDark
+        ? 'rgba(88, 28, 135, 0.75)' // Slightly more opaque for readability
+        : 'rgba(168, 85, 247, 0.85)',
+      borderColor: props.isDark ? 'rgba(168, 85, 247, 0.4)' : 'rgba(168, 85, 247, 0.3)',
+      borderWidth: 1,
+      textStyle: {
+        color: '#fff',
+        // color: props.isDark ? '#fff' : 'oklab(0.216 0.00335142 0.00497674)',
+        fontSize: 12,
+        fontWeight: 500,
+      },
+      extraCssText:
+        'border-radius: 8px; padding: 8px 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);',
     },
     visualMap: {
       min: 0,
       max: props.maxValue,
       show: false,
       inRange: {
-        color: [
-          `${props.color}0F`, // 6% opacity
-          props.color,
-        ],
+        color: [`${props.color}0F`, props.color],
       },
     },
     calendar: {
@@ -113,12 +132,11 @@ const chartOption = computed(() => {
 
 <template>
   <div>
-    <!-- Year selector (only shown when showYearSelector is true) -->
     <div v-if="showYearSelector" class="flex justify-end mb-2">
       <ClientOnly>
         <Select
-          :model-value="String(selectedYear)"
-          @update:model-value="(v: string) => (selectedYear = Number(v))"
+          :model-value="String(activeYear)"
+          @update:model-value="(v: string) => (activeYear = Number(v))"
           :options="availableYears.map(String)"
         />
         <template #fallback>
