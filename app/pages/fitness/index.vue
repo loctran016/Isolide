@@ -9,7 +9,7 @@ useHead({
   meta: [{ name: 'description', content: 'Activity and metric logs.' }],
 })
 
-definePageMeta({ title: 'Body Island',   titleIcon: 'i-mdi:weight-lifter' })
+definePageMeta({ title: 'Body Island', titleIcon: 'i-mdi:weight-lifter' })
 
 const TIME_ZONE = 'Asia/Ho_Chi_Minh'
 
@@ -338,9 +338,9 @@ const splitOption = computed(() => {
         </ClientOnly>
       </div>
       <ClientOnly>
-        <VChart :option="heatmapOption" autoresize class="h-56 w-full" />
+        <VChart :option="heatmapOption" autoresize class="h-50 w-full" />
         <template #fallback>
-          <div class="h-56 flex items-center justify-center text-sm">Loading…</div>
+          <div class="h-50 flex items-center justify-center text-sm">Loading…</div>
         </template>
       </ClientOnly>
       <p class="text-xs mt-1 opacity-85">Streak: {{ currentStreak }} days · sets logged per day</p>
