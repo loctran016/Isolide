@@ -382,10 +382,10 @@ const splitOption = computed(() => {
           class="card lt-lg:max-w-[calc(50%_-_0.5rem)] lg:h-36 flex items-center gap-2 justify-center w-full cursor-pointer group"
         >
           <div
-            class="i-solar:dumbbell-large-minimalistic-line-duotone dark:i-solar:dumbbell-large-minimalistic-bold-duotone text-6xl"
+            class="i-solar:dumbbell-large-minimalistic-line-duotone dark:i-solar:dumbbell-large-minimalistic-bold-duotone text-4xl lg:text-6xl"
           />
           <p
-            class="text-4xl opacity-55 dark:opacity-15 transition-all duration-200 group-hover:opacity-100"
+            class="text-3xl lg:text-4xl opacity-55 dark:opacity-15 transition-all duration-200 group-hover:opacity-100"
           >
             +
           </p>
@@ -400,10 +400,10 @@ const splitOption = computed(() => {
           class="card lg:h-36 lt-lg:max-w-[calc(50%_-_0.5rem)] flex items-center gap-2 justify-center w-full cursor-pointer group"
         >
           <div
-            class="i-solar:treadmill-round-line-duotone dark:i-solar:treadmill-round-bold-duotone text-7xl"
+            class="i-solar:treadmill-round-line-duotone dark:i-solar:treadmill-round-bold-duotone text-5xl lg:text-7xl"
           />
           <p
-            class="text-4xl opacity-55 dark:opacity-15 transition-all duration-200 group-hover:opacity-100"
+            class="text-3xl lg:text-4xl opacity-55 dark:opacity-15 transition-all duration-200 group-hover:opacity-100"
           >
             +
           </p>
@@ -421,9 +421,11 @@ const splitOption = computed(() => {
           data-state="closed"
           class="card lg:h-36 lt-lg:max-w-[calc(50%_-_0.5rem)] flex items-center gap-2 justify-center w-full cursor-pointer group"
         >
-          <div class="i-solar:weigher-line-duotone dark:i-solar:weigher-bold-duotone text-6xl" />
+          <div
+            class="i-solar:weigher-line-duotone dark:i-solar:weigher-bold-duotone text-4xl lg:text-6xl"
+          />
           <p
-            class="text-4xl opacity-55 dark:opacity-15 transition-all duration-200 group-hover:opacity-100"
+            class="text-3xl lg:text-4xl opacity-55 dark:opacity-15 transition-all duration-200 group-hover:opacity-100"
           >
             +
           </p>
@@ -432,8 +434,10 @@ const splitOption = computed(() => {
       <div
         class="card lt-lg:max-w-[calc(50%_-_0.5rem)] w-full lg:h-36 flex flex-col gap-1 items-center justify-center"
       >
-        <div class="text-5xl font-semibold flex items-center gap-1">
-          <div class="i-solar:fire-line-duotone dark:i-solar:fire-bold-duotone text-6xl" />
+        <div class="text-4xl lg:text-5xl font-semibold flex items-center gap-1">
+          <div
+            class="i-solar:fire-line-duotone dark:i-solar:fire-bold-duotone text-4xl lg:text-6xl"
+          />
           <span class="opacity-90 dark:opacity-100">{{ currentStreak }}</span>
         </div>
         <p class="text-base opacity-85">{{ currentStreak === 1 ? 'day' : 'days' }} active</p>
