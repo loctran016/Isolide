@@ -393,7 +393,7 @@ function isOverdue(dateStr: string | null): boolean {
             <span class="text-xs opacity-50">{{ taskTodos.length + studyTodos.length + eventTodos.length }} items</span>
           </div>
 
-          <div class="flex-1 overflow-y-auto space-y-5 pr-1">
+          <div class="flex-1 overflow-y-auto scrollbar-none space-y-5 pr-1">
             
             <!-- TASKS (no due date) -->
             <section>
