@@ -280,7 +280,7 @@ function isOverdue(dateStr: string | null): boolean {
 
 <template>
   <div
-    class="grid grid-cols-1 lt-sm:my-2 lg:grid-cols-4 lg:grid-rows-4 gap-3 p-3 sm:gap-4 sm:p-4 mx-auto font-sans dark:text-gray-100"
+    class="grid grid-cols-1 lt-sm:my-2 lg:grid-cols-4 lg:grid-rows-4 gap-3 p-3 sm:gap-4 sm:p-4 mx-auto font-sans dark:text-gray-100 h-[calc(100vh-var(--header-height))]"
   >
     <ClientOnly>
       <TooltipProvider :delay-duration="150">
@@ -460,7 +460,7 @@ function isOverdue(dateStr: string | null): boolean {
             </section>
 
             <!-- STUDY (purple, with due dates) -->
-            <section>
+            <section class="overflow-y-auto scrollbar-none">
               <h3 class="text-xs font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <div class="i-mdi:book-open-outline text-sm" />
                 Study
