@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CalendarRootProps } from 'reka-ui'
-import { fromDate, toCalendarDate, today } from '@internationalized/date'
+import { fromDate, toCalendarDate, today, parseDate } from '@internationalized/date'
 import {
   CalendarCell,
   CalendarCellTrigger,
@@ -30,6 +30,7 @@ import {
 
 const TIME_ZONE = 'Asia/Ho_Chi_Minh'
 const date = today(TIME_ZONE)
+const todayIso = computed(() => date.toString())
 
 const isDateUnavailable: CalendarRootProps['isDateUnavailable'] = (date) => {
   return date.day === 317
@@ -89,17 +90,21 @@ function eventsForDate(d: { year: number; month: number; day: number }) {
   return eventsByDate.value.get(dateKey(d)) ?? []
 }
 
+// --- ENHANCED TODO SYSTEM ---
+
 interface TodoItem {
   id: number
   task: string
   done: boolean
+  type: 'task' | 'study' | 'event'
+  due_date: string | null
   created_at: string
 }
 
 const { data: todosData } = await useAsyncData('todo', async () => {
   const { data, error } = await supabase
     .from('todo')
-    .select('id, task, done, created_at')
+    .select('id, task, done, type, due_date, created_at')
     .order('created_at', { ascending: true })
 
   if (error) throw error
@@ -108,8 +113,38 @@ const { data: todosData } = await useAsyncData('todo', async () => {
 
 const todos = ref<TodoItem[]>(todosData.value ? [...todosData.value] : [])
 
+// Filter by type
+const taskTodos = computed(() => todos.value.filter(t => t.type === 'task' || !t.type))
+const studyTodos = computed(() => todos.value.filter(t => t.type === 'study'))
+const eventTodos = computed(() => todos.value.filter(t => t.type === 'event'))
+
+// Sort study and events by due date (null/overdue first, then upcoming)
+function sortByDueDate(items: TodoItem[]) {
+  return [...items].sort((a, b) => {
+    if (!a.due_date && !b.due_date) return 0
+    if (!a.due_date) return -1
+    if (!b.due_date) return 1
+    return a.due_date.localeCompare(b.due_date)
+  })
+}
+
+const sortedStudyTodos = computed(() => sortByDueDate(studyTodos.value))
+const sortedEventTodos = computed(() => sortByDueDate(eventTodos.value))
+
+// --- Add new items ---
+
 const newTaskText = ref('')
 const addingTodo = ref(false)
+
+const showStudyForm = ref(false)
+const newStudyTask = ref('')
+const newStudyDueDate = ref('')
+const addingStudy = ref(false)
+
+const showEventForm = ref(false)
+const newEventTask = ref('')
+const newEventDueDate = ref('')
+const addingEvent = ref(false)
 
 async function addTodo() {
   const task = newTaskText.value.trim()
@@ -119,8 +154,8 @@ async function addTodo() {
   try {
     const { data, error } = await supabase
       .from('todo')
-      .insert({ task, done: false })
-      .select('id, task, done, created_at')
+      .insert({ task, done: false, type: 'task' })
+      .select('id, task, done, type, due_date, created_at')
       .single()
 
     if (error) throw error
@@ -132,6 +167,58 @@ async function addTodo() {
     addingTodo.value = false
   }
 }
+
+async function addStudy() {
+  const task = newStudyTask.value.trim()
+  if (!task) return
+
+  addingStudy.value = true
+  try {
+    const dueDate = newStudyDueDate.value || null
+    const { data, error } = await supabase
+      .from('todo')
+      .insert({ task, done: false, type: 'study', due_date: dueDate })
+      .select('id, task, done, type, due_date, created_at')
+      .single()
+
+    if (error) throw error
+    todos.value.push(data as TodoItem)
+    newStudyTask.value = ''
+    newStudyDueDate.value = ''
+    showStudyForm.value = false
+  } catch (e) {
+    console.error('Failed to add study', e)
+  } finally {
+    addingStudy.value = false
+  }
+}
+
+async function addEvent() {
+  const task = newEventTask.value.trim()
+  if (!task) return
+
+  addingEvent.value = true
+  try {
+    const dueDate = newEventDueDate.value || null
+    const { data, error } = await supabase
+      .from('todo')
+      .insert({ task, done: false, type: 'event', due_date: dueDate })
+      .select('id, task, done, type, due_date, created_at')
+      .single()
+
+    if (error) throw error
+    todos.value.push(data as TodoItem)
+    newEventTask.value = ''
+    newEventDueDate.value = ''
+    showEventForm.value = false
+  } catch (e) {
+    console.error('Failed to add event', e)
+  } finally {
+    addingEvent.value = false
+  }
+}
+
+// --- Toggle / Edit / Delete ---
 
 async function toggleDone(todo: TodoItem, value: boolean) {
   const previous = todo.done
@@ -166,6 +253,28 @@ async function removeTodo(todo: TodoItem) {
     todos.value.splice(index, 0, removed)
     console.error('Failed to delete todo', error)
   }
+}
+
+// --- Format helpers ---
+
+function formatDueDate(dateStr: string | null): string {
+  if (!dateStr) return 'Today'
+  const due = parseDate(dateStr)
+  const todayDate = date
+  const diff = due.compare(todayDate)
+  
+  if (diff === 0) return 'Today'
+  if (diff === 1) return 'Tomorrow'
+  if (diff < 0) return `${Math.abs(diff)}d overdue`
+  
+  const jsDate = due.toDate(TIME_ZONE)
+  return jsDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+function isOverdue(dateStr: string | null): boolean {
+  if (!dateStr) return false
+  const due = parseDate(dateStr)
+  return due.compare(date) < 0
 }
 </script>
 
@@ -271,80 +380,275 @@ async function removeTodo(todo: TodoItem) {
           <TibetanHolyDays class="" />
         </div>
 
-        <!-- Todo: 2 rows x 2 cols, top-right -->
+        <!-- Todo: Expanded to 2 cols x 4 rows, replacing Pomodoro & Music -->
         <div
-          class="card text-lg p-8 shadow-sm border flex flex-col gap-4 lg:col-start-3 lg:col-span-2 lg:row-start-1 lg:row-span-2"
+          class="card text-lg p-6 shadow-sm border flex flex-col gap-4 lg:col-start-3 lg:col-span-2 lg:row-start-1 lg:row-span-4 overflow-hidden"
         >
-          <h2 class="card-title">
-            <div class="i-mdi:text-box-edit" />
-            To-do
-          </h2>
-          <ul class="flex flex-col gap-2 overflow-y-auto">
-            <li v-for="todo in todos" :key="todo.id" class="flex items-center gap-3 group">
-              <CheckboxRoot
-                :model-value="todo.done"
-                class="shrink-0 w-5 h-5 rounded-md border border-stone-800/40 dark:border-stone-100/40 flex items-center justify-center data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2 outline-none cursor-pointer transition-colors"
-                @update:model-value="(value) => toggleDone(todo, value === true)"
-              >
-                <CheckboxIndicator>
-                  <div class="i-mdi:check text-white text-sm" />
-                </CheckboxIndicator>
-              </CheckboxRoot>
-              <EditableRoot
-                :model-value="todo.task"
-                class="flex-1"
-                @update:model-value="(value) => saveTaskText(todo, String(value))"
-              >
-                <EditableArea>
-                  <EditablePreview
-                    :class="[
-                      'cursor-text',
-                      todo.done ? 'line-through text-stone-500 dark:text-stone-400' : '',
-                    ]"
+          <!-- Header -->
+          <div class="flex items-center justify-between">
+            <h2 class="card-title">
+              <div class="i-mdi:text-box-edit" />
+              To-do
+            </h2>
+            <span class="text-xs opacity-50">{{ taskTodos.length + studyTodos.length + eventTodos.length }} items</span>
+          </div>
+
+          <div class="flex-1 overflow-y-auto space-y-5 pr-1">
+            
+            <!-- TASKS (no due date) -->
+            <section>
+              <h3 class="text-xs font-medium opacity-50 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <div class="i-mdi:checkbox-outline text-sm" />
+                Tasks
+              </h3>
+              <ul class="flex flex-col gap-1.5">
+                <li v-for="todo in taskTodos" :key="todo.id" class="flex items-center gap-3 group">
+                  <CheckboxRoot
+                    :model-value="todo.done"
+                    class="shrink-0 w-5 h-5 rounded-md border border-stone-800/40 dark:border-stone-100/40 flex items-center justify-center data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2 outline-none cursor-pointer transition-colors"
+                    @update:model-value="(value) => toggleDone(todo, value === true)"
+                  >
+                    <CheckboxIndicator>
+                      <div class="i-mdi:check text-white text-sm" />
+                    </CheckboxIndicator>
+                  </CheckboxRoot>
+                  <EditableRoot
+                    :model-value="todo.task"
+                    class="flex-1"
+                    @update:model-value="(value) => saveTaskText(todo, String(value))"
+                  >
+                    <EditableArea>
+                      <EditablePreview
+                        :class="[
+                          'cursor-text text-sm',
+                          todo.done ? 'line-through opacity-40' : '',
+                        ]"
+                      />
+                      <EditableInput
+                        class="w-full bg-transparent outline-none border-b border-purple-400 text-sm"
+                      />
+                    </EditableArea>
+                  </EditableRoot>
+                  <button
+                    type="button"
+                    class="opacity-0 group-hover:opacity-100 transition-opacity text-stone-500 hover:text-red-500 shrink-0"
+                    aria-label="Remove task"
+                    @click="removeTodo(todo)"
+                  >
+                    <div class="i-mdi:close text-base" />
+                  </button>
+                </li>
+                <li v-if="!taskTodos.length" class="text-xs opacity-40 py-1">No tasks yet</li>
+              </ul>
+              
+              <!-- Add task form -->
+              <form class="flex gap-2 mt-2" @submit.prevent="addTodo">
+                <input
+                  v-model="newTaskText"
+                  type="text"
+                  placeholder="Add a task…"
+                  class="flex-1 bg-transparent outline-none border-b border-stone-800/20 dark:border-stone-100/20 focus:border-purple-500 transition-colors px-1 py-0.5 text-sm"
+                />
+                <button
+                  type="submit"
+                  :disabled="addingTodo || !newTaskText.trim()"
+                  class="text-xs px-2 py-0.5 rounded-md border border-stone-800/20 dark:border-stone-100/20 hover:border-purple-500 hover:text-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shrink-0"
+                >
+                  Add
+                </button>
+              </form>
+            </section>
+
+            <!-- STUDY (purple, with due dates) -->
+            <section>
+              <h3 class="text-xs font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <div class="i-mdi:book-open-outline text-sm" />
+                Study
+              </h3>
+              <ul class="flex flex-col gap-1.5">
+                <li v-for="todo in sortedStudyTodos" :key="todo.id" class="flex items-center gap-3 group">
+                  <CheckboxRoot
+                    :model-value="todo.done"
+                    class="shrink-0 w-5 h-5 rounded-md border border-purple-400/50 flex items-center justify-center data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2 outline-none cursor-pointer transition-colors"
+                    @update:model-value="(value) => toggleDone(todo, value === true)"
+                  >
+                    <CheckboxIndicator>
+                      <div class="i-mdi:check text-white text-sm" />
+                    </CheckboxIndicator>
+                  </CheckboxRoot>
+                  <div class="flex-1 min-w-0">
+                    <EditableRoot
+                      :model-value="todo.task"
+                      @update:model-value="(value) => saveTaskText(todo, String(value))"
+                    >
+                      <EditableArea>
+                        <EditablePreview
+                          :class="[
+                            'cursor-text text-sm truncate',
+                            todo.done ? 'line-through opacity-40' : '',
+                          ]"
+                        />
+                        <EditableInput
+                          class="w-full bg-transparent outline-none border-b border-purple-400 text-sm"
+                        />
+                      </EditableArea>
+                    </EditableRoot>
+                  </div>
+                  <span
+                    class="text-[11px] shrink-0"
+                    :class="isOverdue(todo.due_date) ? 'text-red-500 font-medium' : 'text-purple-500/70'"
+                  >
+                    {{ formatDueDate(todo.due_date) }}
+                  </span>
+                  <button
+                    type="button"
+                    class="opacity-0 group-hover:opacity-100 transition-opacity text-stone-500 hover:text-red-500 shrink-0"
+                    aria-label="Remove"
+                    @click="removeTodo(todo)"
+                  >
+                    <div class="i-mdi:close text-base" />
+                  </button>
+                </li>
+                <li v-if="!studyTodos.length" class="text-xs opacity-40 py-1">No study items yet</li>
+              </ul>
+              
+              <!-- Add study form -->
+              <div v-if="showStudyForm" class="mt-2 space-y-2 p-3 rounded-lg bg-purple-500/5 border border-purple-500/20">
+                <input
+                  v-model="newStudyTask"
+                  type="text"
+                  placeholder="Lecture / topic…"
+                  class="w-full bg-transparent outline-none border-b border-purple-400/30 focus:border-purple-500 px-1 py-0.5 text-sm"
+                />
+                <div class="flex gap-2 items-center">
+                  <input
+                    v-model="newStudyDueDate"
+                    type="date"
+                    class="flex-1 bg-transparent outline-none border-b border-purple-400/30 focus:border-purple-500 px-1 py-0.5 text-sm"
                   />
-                  <EditableInput
-                    class="w-full bg-transparent outline-none border-b border-purple-400"
-                  />
-                </EditableArea>
-              </EditableRoot>
+                  <button
+                    type="button"
+                    class="text-xs px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-600 dark:text-purple-400 hover:bg-purple-500/30 transition-colors disabled:opacity-50 shrink-0"
+                    :disabled="addingStudy || !newStudyTask.trim()"
+                    @click="addStudy"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    class="text-xs px-2 py-0.5 rounded-md hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors shrink-0"
+                    @click="showStudyForm = false"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
               <button
+                v-else
                 type="button"
-                class="opacity-0 group-hover:opacity-100 transition-opacity text-stone-500 hover:text-red-500 shrink-0"
-                aria-label="Remove task"
-                @click="removeTodo(todo)"
+                class="mt-2 text-xs text-purple-500/60 hover:text-purple-500 transition-colors cursor-pointer"
+                @click="showStudyForm = true"
               >
-                <div class="i-mdi:close text-lg" />
+                + Add study item
               </button>
-            </li>
-            <li v-if="!todos.length" class="text-sm text-stone-500 dark:text-stone-400">
-              Nothing to do yet — add your first task below.
-            </li>
-          </ul>
-          <form
-            class="flex gap-2 mt-auto pt-2 border-t border-stone-800/10 dark:border-stone-100/10"
-            @submit.prevent="addTodo"
-          >
-            <input
-              v-model="newTaskText"
-              type="text"
-              placeholder="Add a task…"
-              class="flex-1 bg-transparent outline-none border-b border-stone-800/30 dark:border-stone-100/30 focus:border-purple-500 transition-colors px-1 py-1"
-            />
-            <button
-              type="submit"
-              :disabled="addingTodo || !newTaskText.trim()"
-              class="text-sm px-3 py-1.5 rounded-md border border-stone-800/30 dark:border-stone-100/30 hover:border-purple-500 hover:text-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            >
-              Add
-            </button>
-          </form>
+            </section>
+
+            <!-- EVENTS (pink, with due dates) -->
+            <section>
+              <h3 class="text-xs font-medium text-pink-600 dark:text-pink-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <div class="i-mdi:calendar-star text-sm" />
+                Important Events
+              </h3>
+              <ul class="flex flex-col gap-1.5">
+                <li v-for="todo in sortedEventTodos" :key="todo.id" class="flex items-center gap-3 group">
+                  <CheckboxRoot
+                    :model-value="todo.done"
+                    class="shrink-0 w-5 h-5 rounded-md border border-pink-400/50 flex items-center justify-center data-[state=checked]:bg-pink-500 data-[state=checked]:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2 outline-none cursor-pointer transition-colors"
+                    @update:model-value="(value) => toggleDone(todo, value === true)"
+                  >
+                    <CheckboxIndicator>
+                      <div class="i-mdi:check text-white text-sm" />
+                    </CheckboxIndicator>
+                  </CheckboxRoot>
+                  <div class="flex-1 min-w-0">
+                    <EditableRoot
+                      :model-value="todo.task"
+                      @update:model-value="(value) => saveTaskText(todo, String(value))"
+                    >
+                      <EditableArea>
+                        <EditablePreview
+                          :class="[
+                            'cursor-text text-sm truncate',
+                            todo.done ? 'line-through opacity-40' : '',
+                          ]"
+                        />
+                        <EditableInput
+                          class="w-full bg-transparent outline-none border-b border-pink-400 text-sm"
+                        />
+                      </EditableArea>
+                    </EditableRoot>
+                  </div>
+                  <span
+                    class="text-[11px] shrink-0"
+                    :class="isOverdue(todo.due_date) ? 'text-red-500 font-medium' : 'text-pink-500/70'"
+                  >
+                    {{ formatDueDate(todo.due_date) }}
+                  </span>
+                  <button
+                    type="button"
+                    class="opacity-0 group-hover:opacity-100 transition-opacity text-stone-500 hover:text-red-500 shrink-0"
+                    aria-label="Remove"
+                    @click="removeTodo(todo)"
+                  >
+                    <div class="i-mdi:close text-base" />
+                  </button>
+                </li>
+                <li v-if="!eventTodos.length" class="text-xs opacity-40 py-1">No events yet</li>
+              </ul>
+              
+              <!-- Add event form -->
+              <div v-if="showEventForm" class="mt-2 space-y-2 p-3 rounded-lg bg-pink-500/5 border border-pink-500/20">
+                <input
+                  v-model="newEventTask"
+                  type="text"
+                  placeholder="Event name…"
+                  class="w-full bg-transparent outline-none border-b border-pink-400/30 focus:border-pink-500 px-1 py-0.5 text-sm"
+                />
+                <div class="flex gap-2 items-center">
+                  <input
+                    v-model="newEventDueDate"
+                    type="date"
+                    class="flex-1 bg-transparent outline-none border-b border-pink-400/30 focus:border-pink-500 px-1 py-0.5 text-sm"
+                  />
+                  <button
+                    type="button"
+                    class="text-xs px-2 py-0.5 rounded-md bg-pink-500/20 text-pink-600 dark:text-pink-400 hover:bg-pink-500/30 transition-colors disabled:opacity-50 shrink-0"
+                    :disabled="addingEvent || !newEventTask.trim()"
+                    @click="addEvent"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    class="text-xs px-2 py-0.5 rounded-md hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors shrink-0"
+                    @click="showEventForm = false"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+              <button
+                v-else
+                type="button"
+                class="mt-2 text-xs text-pink-500/60 hover:text-pink-500 transition-colors cursor-pointer"
+                @click="showEventForm = true"
+              >
+                + Add event
+              </button>
+            </section>
+
+          </div>
         </div>
-
-        <!-- Pomodoro: 2 rows x 1 col, bottom-right area -->
-        <PomodoroTimer class="lg:col-start-3 lg:col-span-1 lg:row-start-3 lg:row-span-2" />
-
-        <!-- Music: 2 rows x 1 col, bottom-right area -->
-        <MusicPlayer class="lg:col-start-4 lg:col-span-1 lg:row-start-3 lg:row-span-2" />
       </TooltipProvider>
     </ClientOnly>
   </div>
