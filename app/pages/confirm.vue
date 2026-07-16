@@ -11,7 +11,7 @@ watch(
       await navigateTo('/', { replace: true })
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 onMounted(() => {
@@ -28,10 +28,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-purple-50 to-white flex items-center justify-center p-4">
-    <div class="w-full max-w-md rounded-2xl bg-white shadow-lg border border-purple-100 p-6 text-center space-y-4">
+  <div class="min-h-screenflex items-center justify-center p-4">
+    <div
+      class="w-full max-w-md rounded-2xl card shadow-lg border border-purple-100 p-6 text-center space-y-4"
+    >
       <div class="mx-auto h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
-        <div class="h-6 w-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
+        <div
+          class="h-6 w-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"
+        />
       </div>
 
       <h1 class="text-xl font-semibold text-purple-600">Completing sign-in...</h1>
