@@ -15,6 +15,7 @@ export default defineNuxtConfig({
     '@regle/nuxt',
     '@nuxtjs/cloudinary',
     'nuxt-easy-lightbox',
+    '@vercel/speed-insights'
   ],
   vite: {
     optimizeDeps: {
