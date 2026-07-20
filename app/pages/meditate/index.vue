@@ -1,7 +1,6 @@
 <script setup>
 import { today, parseDate } from '@internationalized/date'
 import { createColumnHelper, FlexRender, getCoreRowModel, useVueTable } from '@tanstack/vue-table'
-import { h } from 'vue'
 import { MEDITATION_PRACTICES } from '~/data/meditationPractices'
 import { getIsland } from '~/data/islands'
 
@@ -19,7 +18,9 @@ const todayCalendarDate = computed(() => parseDate(todayIso.value))
 const { data: logs, refresh: refreshLogs } = await useAsyncData(
   'meditation-logs',
   async () => {
-    const { data, error } = await supabase.from('meditation_logs').select('id, practice_key, date, count')
+    const { data, error } = await supabase
+      .from('meditation_logs')
+      .select('id, practice_key, date, count')
     if (error) throw error
     return data ?? []
   },
@@ -73,8 +74,18 @@ function todayCountFor(key) {
 // --- Month/year selector for the table view below ---
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 
 const selectedMonth = useState('meditate-month', () => todayCalendarDate.value.month)
@@ -120,15 +131,14 @@ const tableData = computed(() =>
 const columnHelper = createColumnHelper()
 
 const tableColumns = computed(() => [
-  columnHelper.accessor('practice', { header: 'Practice', size: 160 }),
-  columnHelper.accessor('unit', { header: 'Unit', size: 70 }),
+  columnHelper.accessor('practice', { header: 'Practice' }),
+  columnHelper.accessor('unit', { header: 'Unit' }),
   ...dayNumbers.value.map((day) =>
     columnHelper.accessor(`d${day}`, {
       header: String(day),
-      size: 56,
       cell: (info) => {
         const value = info.getValue()
-        return value == null ? h('span', { class: 'opacity-60' }, '—') : value
+        return value == null ? h('span', { class: 'opacity-20' }, '—') : value
       },
     }),
   ),
@@ -140,9 +150,6 @@ const table = useVueTable({
   },
   get columns() {
     return tableColumns.value
-  },
-  initialState: {
-    columnPinning: { left: ['practice', 'unit'] },
   },
   getCoreRowModel: getCoreRowModel(),
 })
@@ -204,22 +211,16 @@ const table = useVueTable({
         </ClientOnly>
       </div>
 
-      <div class="relative overflow-x-auto scrollbar-none mt-4">
+      <div class="overflow-x-auto scrollbar-none mt-4">
         <table class="text-sm border-collapse">
           <thead>
             <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
               <th
-  v-for="header in headerGroup.headers"
-  :key="header.id"
-  class="text-left px-2 py-2 font-medium text-xs uppercase tracking-wide opacity-60 whitespace-nowrap"
-  :class="header.column.getIsPinned() ? 'sticky z-20 bg-white/20 dark:bg-stone-800/30' : ''"
-  :style="
-    header.column.getIsPinned()
-      ? { left: `${header.column.getStart('left')}px`, width: `${header.column.getSize()}px` }
-      : { width: `${header.column.getSize()}px` }
-  "
->
-
+                v-for="(header, i) in headerGroup.headers"
+                :key="header.id"
+                class="text-left px-2 py-2 font-medium text-xs uppercase tracking-wide opacity-60 whitespace-nowrap"
+                :class="i === 0 ? 'sticky left-0 bg-inherit z-10' : ''"
+              >
                 <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
               </th>
             </tr>
@@ -231,39 +232,18 @@ const table = useVueTable({
               class="border-t border-stone-800/10 dark:border-stone-100/10"
             >
               <td
-  v-for="cell in row.getVisibleCells()"
-  :key="cell.id"
-  class="px-2 py-2 whitespace-nowrap"
-  :class="[
-    cell.column.getIsPinned()
-      ? 'sticky z-10 bg-white/20 dark:bg-stone-800/30'
-      : 'text-center opacity-80',
-    cell.column.id === 'practice' ? 'font-medium' : '',
-  ]"
-  :style="
-    cell.column.getIsPinned()
-      ? { left: `${cell.column.getStart('left')}px`, width: `${cell.column.getSize()}px` }
-      : { width: `${cell.column.getSize()}px` }
-  "
->
-
+                v-for="(cell, i) in row.getVisibleCells()"
+                :key="cell.id"
+                class="px-2 py-2 whitespace-nowrap"
+                :class="
+                  i === 0 ? 'sticky left-0 bg-inherit z-10 font-medium' : 'text-center opacity-80'
+                "
+              >
                 <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
               </td>
             </tr>
           </tbody>
         </table>
-
-        <!-- Fade/blur mask where scrolling columns pass beneath the pinned region -->
-       <!-- Fade/blur mask where scrolling columns pass beneath the pinned region -->
-<div
-  class="pointer-events-none absolute top-0 bottom-0 w-16 backdrop-blur-md block dark:hidden"
-  style="left: 230px; background: linear-gradient(to right, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.25) 40%, transparent 100%); z-index: 15;"
-/>
-<div
-  class="pointer-events-none absolute top-0 bottom-0 w-16 backdrop-blur-md hidden dark:block"
-  style="left: 230px; background: linear-gradient(to right, rgba(28,25,23,0.55) 0%, rgba(28,25,23,0.25) 40%, transparent 100%); z-index: 15;"
-/>
-
       </div>
     </div>
   </div>
