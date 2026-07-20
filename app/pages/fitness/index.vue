@@ -131,7 +131,7 @@ const splitOption = computed(() => {
 
 <template>
   <div
-    class="my-1.5 sm:my-2 grid grid-cols-2 lg:grid-cols-6 gap-3 p-3 sm:gap-4 sm:px-4 sm:py-4 mx-auto font-sans dark:text-gray-100"
+    class="my-2 grid grid-cols-2 lg:grid-cols-6 gap-3 p-3 sm:gap-4 sm:px-4 sm:py-4 mx-auto font-sans dark:text-gray-100"
   >
     <!-- Progress card -->
     <div class="sm:lt-lg:order-0 col-span-2 lg:col-span-4 card">

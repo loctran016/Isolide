@@ -342,7 +342,7 @@ function getDayAbbr(dateStr: string) {
 
 <template>
   <div
-    class="grid grid-cols-1 md:grid-cols-4 gap-3 p-3 sm:gap-4 sm:px-4 sm:py-4 my-1.5 sm:my-2 mx-auto font-sans dark:text-gray-100"
+    class="grid grid-cols-1 md:grid-cols-4 gap-3 p-3 sm:gap-4 sm:px-4 sm:py-4 my-2 mx-auto font-sans dark:text-gray-100"
   >
     <!-- Skincare: AM + PM, full width -->
     <div class="col-span-full card">
