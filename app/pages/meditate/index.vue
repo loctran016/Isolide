@@ -1,4 +1,4 @@
-<script setup>
+<script setup >
 import { h, ref, computed } from 'vue'
 import { today, parseDate } from '@internationalized/date'
 import { createColumnHelper, FlexRender, getCoreRowModel, useVueTable } from '@tanstack/vue-table'
@@ -132,7 +132,7 @@ const tableData = computed(() =>
 const columnHelper = createColumnHelper()
 
 // --- Column pinning state ---
-const columnPinning = ref<{ left?: string[] }>({
+const columnPinning = ref({
   left: ['practice', 'unit'], // pin first two columns
 })
 
