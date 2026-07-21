@@ -1,4 +1,5 @@
 <script setup>
+import { h, ref, computed } from 'vue'
 import { today, parseDate } from '@internationalized/date'
 import { createColumnHelper, FlexRender, getCoreRowModel, useVueTable } from '@tanstack/vue-table'
 import { MEDITATION_PRACTICES } from '~/data/meditationPractices'
@@ -130,12 +131,26 @@ const tableData = computed(() =>
 
 const columnHelper = createColumnHelper()
 
+// --- Column pinning state ---
+const columnPinning = ref<{ left?: string[] }>({
+  left: ['practice', 'unit'], // pin first two columns
+})
+
 const tableColumns = computed(() => [
-  columnHelper.accessor('practice', { header: 'Practice' }),
-  columnHelper.accessor('unit', { header: 'Unit' }),
+  columnHelper.accessor('practice', {
+    header: 'Practice',
+    size: 150,           // required for offset calculation
+    enablePinning: true,
+  }),
+  columnHelper.accessor('unit', {
+    header: 'Unit',
+    size: 80,
+    enablePinning: true,
+  }),
   ...dayNumbers.value.map((day) =>
     columnHelper.accessor(`d${day}`, {
       header: String(day),
+      size: 45,
       cell: (info) => {
         const value = info.getValue()
         return value == null ? h('span', { class: 'opacity-20' }, '—') : value
@@ -152,6 +167,14 @@ const table = useVueTable({
     return tableColumns.value
   },
   getCoreRowModel: getCoreRowModel(),
+  state: {
+    columnPinning,
+  },
+  onColumnPinningChange: (updater) => {
+    columnPinning.value = typeof updater === 'function'
+      ? updater(columnPinning.value)
+      : updater
+  },
 })
 
 const { exportToExcel } = useMeditationExport()
@@ -237,10 +260,15 @@ async function handleExport() {
           <thead>
             <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
               <th
-                v-for="(header, i) in headerGroup.headers"
+                v-for="header in headerGroup.headers"
                 :key="header.id"
                 class="text-left px-2 py-2 font-medium text-xs uppercase tracking-wide opacity-60 whitespace-nowrap"
-                :class="i === 0 ? 'sticky left-0 bg-inherit z-10' : ''"
+                :class="{
+                  'sticky z-10': header.column.getIsPinned(),
+                }"
+                :style="header.column.getIsPinned() === 'left'
+                  ? { left: `${header.column.getStart('left')}px` }
+                  : {}"
               >
                 <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
               </th>
@@ -253,12 +281,17 @@ async function handleExport() {
               class="border-t border-stone-800/10 dark:border-stone-100/10"
             >
               <td
-                v-for="(cell, i) in row.getVisibleCells()"
+                v-for="cell in row.getVisibleCells()"
                 :key="cell.id"
                 class="px-2 py-2 whitespace-nowrap"
-                :class="
-                  i === 0 ? 'sticky left-0 bg-inherit z-10 font-medium' : 'text-center opacity-80'
-                "
+                :class="{
+                  'sticky z-10': cell.column.getIsPinned(),
+                  'text-center opacity-80': !cell.column.getIsPinned(),
+                  'font-medium': cell.column.id === 'practice',
+                }"
+                :style="cell.column.getIsPinned() === 'left'
+                  ? { left: `${cell.column.getStart('left')}px` }
+                  : {}"
               >
                 <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
               </td>
