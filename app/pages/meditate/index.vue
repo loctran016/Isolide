@@ -1,5 +1,5 @@
-<script setup >
-import { h, ref, computed } from 'vue'
+<script setup>
+import { h, ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { today, parseDate } from '@internationalized/date'
 import { createColumnHelper, FlexRender, getCoreRowModel, useVueTable } from '@tanstack/vue-table'
 import { MEDITATION_PRACTICES } from '~/data/meditationPractices'
@@ -117,7 +117,7 @@ function countForDay(practiceKey, day) {
   return logIndex.value[practiceKey]?.[iso]?.count ?? null
 }
 
-// --- Pivoted table: rows = practices, columns = days of the selected month ---
+// --- Pivoted table ---
 
 const tableData = computed(() =>
   MEDITATION_PRACTICES.map((practice) => {
@@ -131,26 +131,28 @@ const tableData = computed(() =>
 
 const columnHelper = createColumnHelper()
 
-// --- Column pinning state ---
-const columnPinning = ref({
-  left: ['practice', 'unit'], // pin first two columns
-})
+// Column sizes (px)
+const PRACTICE_WIDTH = 150
+const UNIT_WIDTH = 80
+const DAY_WIDTH = 45
+
+const columnPinning = ref({ left: ['practice', 'unit'] })
 
 const tableColumns = computed(() => [
   columnHelper.accessor('practice', {
     header: 'Practice',
-    size: 150,           // required for offset calculation
+    size: PRACTICE_WIDTH,
     enablePinning: true,
   }),
   columnHelper.accessor('unit', {
     header: 'Unit',
-    size: 80,
+    size: UNIT_WIDTH,
     enablePinning: true,
   }),
   ...dayNumbers.value.map((day) =>
     columnHelper.accessor(`d${day}`, {
       header: String(day),
-      size: 45,
+      size: DAY_WIDTH,
       cell: (info) => {
         const value = info.getValue()
         return value == null ? h('span', { class: 'opacity-20' }, '—') : value
@@ -160,25 +162,16 @@ const tableColumns = computed(() => [
 ])
 
 const table = useVueTable({
-  get data() {
-    return tableData.value
-  },
-  get columns() {
-    return tableColumns.value
-  },
+  get data() { return tableData.value },
+  get columns() { return tableColumns.value },
   getCoreRowModel: getCoreRowModel(),
-  state: {
-    columnPinning,
-  },
+  state: { columnPinning },
   onColumnPinningChange: (updater) => {
-    columnPinning.value = typeof updater === 'function'
-      ? updater(columnPinning.value)
-      : updater
+    columnPinning.value = typeof updater === 'function' ? updater(columnPinning.value) : updater
   },
 })
 
 const { exportToExcel } = useMeditationExport()
-
 async function handleExport() {
   await exportToExcel({
     year: selectedYear.value,
@@ -188,12 +181,63 @@ async function handleExport() {
     countForDay,
   })
 }
+
+// ---------- Dynamic opacity on scroll ----------
+const scrollContainer = ref(null)
+const columnOpacities = ref({})
+
+function updateOpacities() {
+  const container = scrollContainer.value
+  if (!container) return
+
+  const scrollLeft = container.scrollLeft
+  const pinnedWidth = PRACTICE_WIDTH + UNIT_WIDTH // 230px
+
+  const newOpacities = {}
+
+  for (const col of table.getVisibleFlatColumns()) {
+    const colId = col.id
+    if (columnPinning.value.left?.includes(colId)) continue
+
+    const headerCell = container.querySelector(`th[data-column-id="${colId}"]`)
+    if (!headerCell) continue
+
+    const colLeft = headerCell.offsetLeft - scrollLeft
+    const colRight = colLeft + (headerCell.offsetWidth || DAY_WIDTH)
+
+    if (colRight <= pinnedWidth) {
+      newOpacities[colId] = 0
+    } else if (colLeft < pinnedWidth) {
+      const visiblePart = colRight - pinnedWidth
+      const totalWidth = headerCell.offsetWidth || DAY_WIDTH
+      newOpacities[colId] = Math.max(0, Math.min(1, visiblePart / totalWidth))
+    } else {
+      newOpacities[colId] = 1
+    }
+  }
+
+  columnOpacities.value = newOpacities
+}
+
+let scrollHandler = null
+
+onMounted(() => {
+  if (scrollContainer.value) {
+    scrollHandler = () => updateOpacities()
+    scrollContainer.value.addEventListener('scroll', scrollHandler, { passive: true })
+    updateOpacities()
+  }
+})
+
+onBeforeUnmount(() => {
+  if (scrollContainer.value && scrollHandler) {
+    scrollContainer.value.removeEventListener('scroll', scrollHandler)
+  }
+})
 </script>
 
 <template>
-  <div
-    class="my-2 grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 sm:py-4 mx-auto font-sans dark:text-gray-100"
-  >
+  <div class="my-2 grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 sm:py-4 mx-auto font-sans dark:text-gray-100">
     <!-- Quick actions -->
     <div class="card col-span-full">
       <h2 class="card-title">
@@ -255,20 +299,26 @@ async function handleExport() {
         </ClientOnly>
       </div>
 
-      <div class="overflow-x-auto scrollbar-none mt-4">
-        <table class="text-sm border-collapse">
+      <div ref="scrollContainer" class="overflow-x-auto scrollbar-none mt-4">
+        <table class="text-sm border-collapse table-fixed">
           <thead>
             <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
               <th
                 v-for="header in headerGroup.headers"
                 :key="header.id"
-                class="text-left px-2 py-2 font-medium text-xs uppercase tracking-wide opacity-60 whitespace-nowrap"
+                :data-column-id="header.column.id"
+                class="text-left px-2 py-2 font-medium text-xs uppercase tracking-wide opacity-60 whitespace-nowrap overflow-hidden text-ellipsis"
                 :class="{
                   'sticky z-10': header.column.getIsPinned(),
                 }"
-                :style="header.column.getIsPinned() === 'left'
-                  ? { left: `${header.column.getStart('left')}px` }
-                  : {}"
+                :style="{
+                  width: `${header.column.columnDef.size}px`,
+                  minWidth: `${header.column.columnDef.size}px`,
+                  ...(header.column.getIsPinned() === 'left' ? { left: `${header.column.getStart('left')}px` } : {}),
+                  ...(columnOpacities[header.column.id] !== undefined
+                    ? { opacity: columnOpacities[header.column.id] }
+                    : {}),
+                }"
               >
                 <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
               </th>
@@ -283,15 +333,20 @@ async function handleExport() {
               <td
                 v-for="cell in row.getVisibleCells()"
                 :key="cell.id"
-                class="px-2 py-2 whitespace-nowrap"
+                class="px-2 py-2 whitespace-nowrap overflow-hidden text-ellipsis"
                 :class="{
                   'sticky z-10': cell.column.getIsPinned(),
-                  'text-center opacity-80': !cell.column.getIsPinned(),
+                  'text-center': !cell.column.getIsPinned(),
                   'font-medium': cell.column.id === 'practice',
                 }"
-                :style="cell.column.getIsPinned() === 'left'
-                  ? { left: `${cell.column.getStart('left')}px` }
-                  : {}"
+                :style="{
+                  width: `${cell.column.columnDef.size}px`,
+                  minWidth: `${cell.column.columnDef.size}px`,
+                  ...(cell.column.getIsPinned() === 'left' ? { left: `${cell.column.getStart('left')}px` } : {}),
+                  ...(columnOpacities[cell.column.id] !== undefined
+                    ? { opacity: columnOpacities[cell.column.id] }
+                    : {}),
+                }"
               >
                 <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
               </td>
