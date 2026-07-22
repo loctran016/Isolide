@@ -24,14 +24,14 @@ export const MEDITATION_PRACTICES: MeditationPractice[] = [
   },
   {
     key: 'phat_dinh_ton_thang',
-    label: 'Phật Đảnh Tôn Thắng',
+    label: 'Namgyalma',
     unit: 'Lần',
     firstValue: 1,
     stepValue: 1,
   },
   {
     key: 'lien_hoa_sinh_truong_tho',
-    label: 'Liên Hoa Sinh Trường Thọ',
+    label: 'LHS Trường Thọ',
     unit: 'Tràng',
     firstValue: 1,
     stepValue: 1,
