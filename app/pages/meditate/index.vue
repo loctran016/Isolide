@@ -13,8 +13,9 @@ definePageMeta({ title: island.pageTitle, titleIcon: island.titleIcon })
 const TIME_ZONE = 'Asia/Ho_Chi_Minh'
 const supabase = useSupabaseClient()
 
-const todayIso = useState('meditate-today', () => today(TIME_ZONE).toString())
-const todayCalendarDate = computed(() => parseDate(todayIso.value))
+// Plain consts — no SSR/hydration mismatch risk, no reactive overhead
+const todayIso = today(TIME_ZONE).toString()
+const todayCalendarDate = parseDate(todayIso)
 
 const { data: logs, refresh: refreshLogs } = await useAsyncData(
   'meditation-logs',
@@ -44,7 +45,7 @@ async function tapPractice(practice) {
   pending.value[practice.key] = true
 
   try {
-    const existing = logIndex.value[practice.key]?.[todayIso.value]
+    const existing = logIndex.value[practice.key]?.[todayIso]
     if (existing) {
       const { error } = await supabase
         .from('meditation_logs')
@@ -54,7 +55,7 @@ async function tapPractice(practice) {
     } else {
       const { error } = await supabase.from('meditation_logs').insert({
         practice_key: practice.key,
-        date: todayIso.value,
+        date: todayIso,
         count: practice.firstValue,
       })
       if (error) throw error
@@ -68,7 +69,7 @@ async function tapPractice(practice) {
 }
 
 function todayCountFor(key) {
-  return logIndex.value[key]?.[todayIso.value]?.count ?? 0
+  return logIndex.value[key]?.[todayIso]?.count ?? 0
 }
 
 const MONTH_NAMES = [
@@ -76,11 +77,11 @@ const MONTH_NAMES = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
-const selectedMonth = useState('meditate-month', () => todayCalendarDate.value.month)
-const selectedYear = useState('meditate-year', () => todayCalendarDate.value.year)
+const selectedMonth = useState('meditate-month', () => todayCalendarDate.month)
+const selectedYear = useState('meditate-year', () => todayCalendarDate.year)
 
 const availableYears = computed(() => {
-  const years = new Set([todayCalendarDate.value.year])
+  const years = new Set([todayCalendarDate.year])
   for (const log of logs.value ?? []) {
     years.add(Number(log.date.slice(0, 4)))
   }
@@ -158,8 +159,9 @@ const table = useVueTable({
   },
 })
 
-const { exportToExcel } = useMeditationExport()
+// Lazy-load ExcelJS only when user clicks export (~937 kB deferred)
 async function handleExport() {
+  const { exportToExcel } = await import('~/composables/useMeditationExport')
   await exportToExcel({
     year: selectedYear.value,
     month: selectedMonth.value,
@@ -171,15 +173,13 @@ async function handleExport() {
 
 // ---------- Month-Year grouped select ----------
 
-// Generate grouped options: years as labels, options like "July 2026"
 const monthYearGroups = computed(() => {
   return availableYears.value.map((year) => ({
     label: String(year),
-    options: MONTH_NAMES.map((month, idx) => `${month} ${year}`).reverse(), // latest month first
+    options: MONTH_NAMES.map((month, idx) => `${month} ${year}`).reverse(),
   }))
 })
 
-// Two‑way binding for the combined select
 const selectedMonthYear = computed({
   get: () => `${MONTH_NAMES[selectedMonth.value - 1]} ${selectedYear.value}`,
   set: (val) => {
@@ -278,7 +278,6 @@ onBeforeUnmount(() => {
         </h2>
         <ClientOnly>
           <div class="flex items-center gap-2">
-            <!-- Single grouped month-year select -->
             <SelectGrouped v-model="selectedMonthYear" :groups="monthYearGroups" />
             <button
               type="button"
