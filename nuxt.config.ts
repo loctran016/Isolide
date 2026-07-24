@@ -18,14 +18,6 @@ export default defineNuxtConfig({
     '@vercel/speed-insights',
   ],
 
-  routeRules: {
-    // ISR on static content pages – regenerate every 2 minutes
-    '/musical': { swr: 120 },
-    '/gallery': { swr: 120 },
-
-    // All other pages remain dynamic SSR (default)
-    // '/fitness': { ssr: true },   ← implicit, no rule needed
-  },
   vite: {
     optimizeDeps: {
       include: ['@vue/devtools-core', '@vue/devtools-kit', '@internationalized/date', 'reka-ui'],
@@ -55,6 +47,13 @@ export default defineNuxtConfig({
     '/manifest.webmanifest': { ssr: false, prerender: false },
     '/dev-sw.js': { ssr: false, prerender: false },
     '/sw.js': { ssr: false, prerender: false },
+    // ISR on static content pages – regenerate every 2 minutes
+    '/musical': { swr: 300 },
+    '/gallery': { swr: 300 },
+    '/': { swr: 120 },
+
+    // All other pages remain dynamic SSR (default)
+    // '/fitness': { ssr: true },   ← implicit, no rule needed
   },
   runtimeConfig: {
     cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
